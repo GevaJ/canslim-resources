@@ -1,0 +1,1013 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CANSLIM Resources</title>
+    <style>
+        html, body { height: 100%; }
+        body { font-family: Arial, sans-serif; margin: 0; background: radial-gradient(circle at top, #1f2b46, #0d1324 65%); color: #e6ecff; }
+        .tabs { display: flex; background: rgba(7, 12, 24, 0.92); position: sticky; top: 0; z-index: 10; backdrop-filter: blur(6px); }
+        .tab { padding: 12px 18px; color: #cbd5ff; cursor: pointer; user-select: none; transition: background 0.2s; }
+        .tab:not(.active):hover { background: rgba(255, 255, 255, 0.08); }
+        .tab.active { background: linear-gradient(135deg, #2563eb, #7c3aed); color: #fff; }
+        .content { display: none; padding: 28px; }
+        .content.active { display: block; background: rgba(10, 16, 30, 0.82); min-height: calc(100vh - 60px); border-top: 1px solid rgba(255,255,255,0.05); box-shadow: 0 20px 45px rgba(5,8,18,0.55); border-radius: 0 0 18px 18px; backdrop-filter: blur(8px); }
+        iframe { width: 100%; max-width: 560px; height: auto; aspect-ratio: 16 / 9; margin: 10px 0; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); background: #000; }
+        ul { list-style: none; padding: 0; margin: 0; }
+        li { margin: 10px 0; }
+        a { color: #60a5ff; word-break: break-all; text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; }
+        img, video { max-width: 100%; height: auto; border-radius: 6px; }
+        video { border: 1px solid #dfe3e8; background: #000; }
+        .video-player { width: 100%; max-width: 560px; height: auto; aspect-ratio: 16 / 9; border-radius: 6px; display: block; object-fit: cover; }
+        .gallery-item { background: rgba(255,255,255,0.03); padding: 10px; border: 1px solid rgba(255,255,255,0.06); border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.35); display: flex; flex-direction: column; gap: 8px; }
+        .media-card { margin-bottom: 24px; padding: 16px; border: 1px solid rgba(255,255,255,0.04); border-radius: 12px; background: rgba(17,24,39,0.8); box-shadow: 0 12px 30px rgba(0,0,0,0.35); }
+        .media-card h3 { margin: 0 0 8px 0; font-size: 1rem; color: #e3e8ff; }
+        .empty-state { color: #9ba6c7; font-style: italic; margin: 0; }
+        .youtube-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 24px; }
+        .youtube-card { border: 1px solid rgba(255,255,255,0.07); border-radius: 14px; padding: 18px; background: linear-gradient(160deg, rgba(7,11,23,0.95), rgba(20,27,46,0.9)); box-shadow: 0 20px 35px rgba(0,0,0,0.45); display: flex; flex-direction: column; align-items: center; gap: 12px; }
+        .youtube-card h3 { text-align: center; }
+        .link-list { list-style: decimal; padding-left: 24px; margin-top: 12px; }
+        .link-list li { margin-bottom: 12px; }
+        .link-title { font-weight: 600; display: block; margin-bottom: 2px; color: #93c5ff; }
+        .link-url { font-size: 0.85rem; color: #c1c9e8; word-break: break-all; display: block; }
+        .pdf-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+        .pdf-card { border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 14px; background: rgba(255,255,255,0.03); box-shadow: 0 10px 24px rgba(0,0,0,0.35); cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
+        .pdf-card:hover { transform: translateY(-4px); box-shadow: 0 16px 32px rgba(0,0,0,0.45); }
+        .pdf-thumb { width: 100%; height: 220px; object-fit: cover; background: linear-gradient(135deg,#1e293b,#334155); border-radius: 10px; border: 1px solid rgba(255,255,255,0.08); }
+        .pdf-title { margin-top: 10px; font-weight: 600; color: #e8edff; }
+        .media-caption { font-size: 0.9rem; color: #b6c2e6; margin: 0; }
+        .gallery-item img { cursor: zoom-in; }
+        .lightbox { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(3,6,17,0.85); opacity: 0; pointer-events: none; transition: opacity 0.25s ease; z-index: 100; padding: 20px; }
+        .lightbox.visible { opacity: 1; pointer-events: auto; }
+        .lightbox.hidden { display: none; }
+        .lightbox-overlay { position: absolute; inset: 0; }
+        .lightbox-inner { position: relative; max-width: 90vw; max-height: 90vh; background: #fff; border-radius: 10px; padding: 16px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
+        .lightbox-inner img { max-width: 85vw; max-height: 80vh; object-fit: contain; border-radius: 6px; cursor: zoom-out; }
+        .lightbox-close { position: absolute; top: 6px; right: 10px; border: none; background: transparent; font-size: 1.5rem; cursor: pointer; color: #333; }
+        .books-hero { margin-top: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 18px; align-items: start; }
+        .books-hero img { width: 100%; border-radius: 16px; border: 2px solid #0f172a; box-shadow: 0 15px 35px rgba(15,23,42,0.45); display: block; }
+        .books-link { font-weight: 600; color: #d97706; }
+        .support-modal { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(4, 6, 15, 0.85); opacity: 0; pointer-events: none; transition: opacity 0.3s ease; z-index: 200; padding: 20px; }
+        .support-modal.visible { opacity: 1; pointer-events: auto; }
+        .support-card { background: linear-gradient(145deg, #11193a, #060a1f); border: 1px solid rgba(255,255,255,0.08); border-radius: 18px; padding: 28px; max-width: 460px; color: #f4f8ff; box-shadow: 0 30px 60px rgba(0,0,0,0.6); text-align: center; position: relative; }
+        .support-card h3 { margin-top: 0; font-size: 1.5rem; }
+        .support-card p { color: #cad5f7; }
+        .support-close { position: absolute; top: 12px; right: 12px; border: none; background: transparent; color: #fff; font-size: 1.3rem; cursor: pointer; }
+        .support-cta { margin-top: 16px; display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; background: linear-gradient(135deg,#fbbf24,#f97316); color: #150f02; font-weight: 700; border-radius: 999px; text-decoration: none; box-shadow: 0 10px 20px rgba(249,115,22,0.35); }
+    </style>
+</head>
+<body>
+    <div class="tabs">
+        <div class="tab active" onclick="showTab(event, 'home')">Home</div>
+        <div class="tab" onclick="showTab(event, 'pdfs')">PDFs</div>
+        <div class="tab" onclick="showTab(event, 'youtube')">YouTube</div>
+        <div class="tab" onclick="showTab(event, 'images')">Images</div>
+        <div class="tab" onclick="showTab(event, 'videos')">Videos</div>
+        <div class="tab" onclick="showTab(event, 'books')">Books✨</div>
+    </div>
+
+    <div id="home" class="content active">
+        <h2>Other Links</h2>
+        <ol id="other-links" class="link-list"></ol>
+    </div>
+
+    <div id="pdfs" class="content">
+        <h2>PDFs</h2>
+        <div id="pdf-list" class="pdf-grid"></div>
+    </div>
+
+    <div id="youtube" class="content">
+        <h2>YouTube Videos</h2>
+        <div id="youtube-videos" class="youtube-grid"></div>
+    </div>
+
+    <div id="images" class="content">
+        <h2>Images</h2>
+        <div id="images-gallery" class="gallery"></div>
+    </div>
+
+    <div id="videos" class="content">
+        <h2>Discord Videos</h2>
+        <div id="videos-gallery" class="gallery"></div>
+    </div>
+
+    <div id="books" class="content">
+        <h2>Support the community to gain access to the full CANSLIM books library.</h2>
+        <p>
+            Pitch in to keep the resource growing and unlock the curated bookshelf by backing us on
+            <a class="books-link" href="http://ko-fi.com/ibd_canslim_investor_network/tiers" target="_blank" rel="noopener noreferrer">Ko-fi</a>.
+        </p>
+        <div class="books-hero">
+            <img src="https://media.discordapp.net/attachments/1347564075407904768/1434804102650662984/image.png?ex=6912e373&is=691191f3&hm=68d6fcf6c57a1d4092e2d50f5a59c010cf071509e6b6c7c065a4911a7c482544&=&format=webp&quality=lossless&width=611&height=577" alt="CANSLIM book list preview">
+            <img src="https://media.discordapp.net/attachments/1347564075407904768/1434804103782862909/image.png?ex=6912e373&is=691191f3&hm=91c8901ca8f840941c1482767ab910d0e168007b8dbc127025b517c7c33cc36b&=&format=webp&quality=lossless&width=651&height=264" alt="CANSLIM book list preview2">
+        </div>
+    </div>
+
+    <div id="support-modal" class="support-modal" aria-hidden="true">
+        <div class="support-card">
+            <button class="support-close" aria-label="Close support message">&times;</button>
+            <h3>Support the CANSLIM Community</h3>
+            <p>Help us maintain the research archive, book scans, and curated notes for fellow investors.</p>
+            <a class="support-cta" href="http://ko-fi.com/ibd_canslim_investor_network/tiers" target="_blank" rel="noopener noreferrer">Back us on Ko-fi</a>
+        </div>
+    </div>
+
+    <div id="image-lightbox" class="lightbox hidden">
+        <div class="lightbox-overlay" data-lightbox-close></div>
+        <div class="lightbox-inner">
+            <button class="lightbox-close" aria-label="Close image preview" data-lightbox-close>&times;</button>
+            <img id="lightbox-photo" src="" alt="Enlarged preview">
+            <p id="lightbox-caption"></p>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.min.js" integrity="sha512-O5bY5p+qZ+nhewc7ovQoPGwTpghSJOnA7xz/ES6sDIo8He3G6gZj/O9oYF6W1hLECPaKhLPgH8JbImTeTTKQ0g==" crossorigin="anonymous"></script>
+    <script>
+        const scrapedData = { links: [], images: [], videos: [] };
+
+        scrapedData.links.push(
+            'https://youtu.be/9ZJK8175drM',
+            'https://traderlion.com/the-tml-talk/the-tml-talk-november-7th-2025/',
+            'https://dn710101.ca.archive.org/0/items/WyckoffMethodOfTapeReading/Wyckoff%20-%20Method%20of%20Tape%20Reading.pdf',
+            'https://youtu.be/Qt-vsBmF6k8?si=5YtdM5qJAH4rDkwE',
+            'https://shop.investors.com/images/promotional/ClimaxTop_Booklet.pdf',
+            'https://youtu.be/1nWQ7K46GbY?si=dzoxVMxVVglK-1qH',
+            'https://discord.com/channels/1259392713174814812/1347564075407904768/1432243043859304609',
+            'https://app.box.com/s/mfk9gbd8p5bi7yx7rmo7uewzdo1srd2o',
+            'https://youtu.be/HuT6Z1307OM?si=qEPvFV27cf46Kq5G',
+            'https://youtu.be/HJ7uxCWSLRw?si=yo9RFVHYxHPQwQ_f',
+            'https://limewire.com/d/Jmgkn#dj18yZ77SZ',
+            'https://limewire.com/d/Jmgkn#dj18yZ77SZ',
+            'https://www.limewire.com/d/Jmgkn#dj18yZ77SZ',
+            'https://youtube.com/shorts/wYWrVgYtlws?si=uyyCqx4tZt-1jPBa',
+            'https://archive.ph/0MUcT',
+            'https://openmedicinefoundation.crowdchange.co/6858',
+            'https://sites.google.com/view/sep-2025-joint-bay-area-gro29/home',
+            'https://www.youtube.com/watch?v=XXYb2aGNJD8',
+            'https://youtu.be/WglROZAI_SI?si=PUdUvvg90FKZG-NV',
+            'https://youtu.be/fPO3mex0HbA?si=OI4dyUhWA7_ZE7qj'
+        );
+
+        scrapedData.links.push(
+            'https://youtu.be/df7D2wkKqLU?si=j17qsJSXszo4Fkh2',
+            'https://www.youtube.com/watch?v=Z23POM5bnnU',
+            'https://youtu.be/0sFHxEmulBk?si=z0JnbLbh77VbmTzm',
+            'https://youtu.be/e9qqvjIyMhk?si=54JxNcLSOtBGRU-J',
+            'https://www.investors.com/research/ibd-live-qa/ibd-live-qa-and-two-key-stock-lists-jhjkfor-sept-23-2025',
+            'https://youtu.be/ocwf3HcwUbU',
+            'https://sites.google.com/view/petalumaibdmeetup',
+            'https://www.youtube.com/watch?v=sbOmM-gzMaM',
+            'https://www.youtube.com/watch?v=JNODOXPgSLc',
+            'https://docs.google.com/presentation/d/1CT4jdqHn5Qq9U8OA4C4T-cxhGJ4PVW9cjs_TqsMScbo/edit?usp=sharing',
+            'https://www.dropbox.com/scl/fi/h2m3fx5o0a075d2ydxygb/Cup-with-Handle_1028008.pdf?rlkey=aso6im2ou5yod4nt5eapd3x5e&e=1',
+            'https://www.youtube.com/watch?v=TCUlu1ve884',
+            'https://x.com/BossTradingGrp/status/1960806086996582545',
+            'https://www.dropbox.com/scl/fi/c3r6drbwfteokke08kyql/subscriber_questions_august_27th-_2025-1080p.mp4?rlkey=kzqqn2lwcbh1g9nyw9gszupeg&st=edkfqftb&dl=0',
+            'https://www.dropbox.com/scl/fi/682uoz7spelwubxzr4a07/Market-Commentary-August-27th-2025.mp4?rlkey=fl4xti05oolh4m8iw7tm423tk&st=d7eny52l&dl=0',
+            'https://www.dropbox.com/scl/fi/tg74cao3fhha6vjxvbc6l/Special-NVIDIA-Earning-Report.mp4?rlkey=6kkkqfgga298hft5z87aglp63&st=w6c8o5t7&dl=0',
+            'https://sites.google.com/view/petalumaibdmeetup',
+            'https://youtu.be/K-OGr4d1QA0',
+            'https://www.youtube.com/watch?v=sivAG4HJGvU',
+            'https://www.youtube.com/watch?v=KT95CRux9HE'
+        );
+
+        scrapedData.links.push(
+            'https://x.com/NickSchmidt_/status/1959353267378442283',
+            'https://groups.google.com/g/mollys-money-makers',
+            'https://youtu.be/H7CtMQ5_g7Y',
+            'https://www.koblich-chronicles.com/',
+            'https://www.youtube.com/watch?v=_leWNYhFCcY',
+            'https://vimeo.com/1111112805?share=copy',
+            'https://www.youtube.com/@JesseLivermoreTradingInsights',
+            'https://www.youtube.com/watch?v=KOVEzCIGAyA',
+            'https://youtu.be/atp5u48Q8x0?si=WQfCSEC3eeiqte-v',
+            'https://t.co/Kz5govXN7C',
+            'https://youtu.be/UevHJvBCKEg?si=7wW7VZRFj-jDXiAQ',
+            'https://youtu.be/w0dVYd1w5E0?si=bBYTLWKR0HeCInoj',
+            'https://x.com/NickSchmidt_/status/1951641426338447523/photo/1',
+            'https://youtu.be/z_HvNkYHV4M?si=-Fto_eoZEKZGcPRr',
+            'https://youtu.be/R4G1lk8jzW8?si=U2q_ZhJyyhEi7w6q',
+            'https://drive.google.com/file/d/1vqzCdD1GCN0jqy9l4OM1tRrNPAN06uFT/view?usp=drive_link',
+            'https://www.youtube.com/live/XMumLeABtxc?si=rc_E0rKe_dkwLWCE',
+            'https://sites.google.com/view/petalumaibdmeetup/home/',
+            'https://youtube.com/@webby5150?si=oksIEbAIDlF3Bj9K',
+            'https://www.amazon.com/Perfect-Method-Speculate-Stocks-Trend-ebook/dp/B0DKDDHB58'
+        );
+
+        scrapedData.links.push(
+            'https://youtu.be/hVCcVRxaxJY',
+            'https://pimpmymoney.net/the-active-growth-investor-caruso-insights/',
+            'https://www.youtube.com/live/5yaXxorHUoc',
+            'https://www.youtube.com/watch?v=PEOjBcn3GKw',
+            'https://www.youtube.com/watch?v=KOVEzCIGAyA',
+            'https://www.youtube.com/live/Jy7NfuRUvKI?si=FVLSicjxqXWQgyd2',
+            'https://youtu.be/APh9POIzfH0?si=GMIJLwVfptGf1HZc',
+            'https://youtu.be/OgnQnP_Owhw',
+            'https://www.youtube.com/watch?v=K7q2bFNnmXs',
+            'https://drive.google.com/file/d/0BwohCU1U7DOmU1ZGdDdkVmswMEU/view?resourcekey=0-ZK9JWXZLEEjBmhDy4zzEpg',
+            'https://sites.google.com/view/petalumaibdmeetup/home/10-basic-selling-rules',
+            'https://www.investors.com/data-tables/industry-group-rankings-may-19-2025/',
+            'https://mega.nz/folder/vrBkzTKJ#Hm4RdzYdFGQmsOzzT0RRYQ',
+            'https://youtu.be/Ieq1RMr7Q1I?si=qhmquupHZhieLdQH',
+            'https://drive.google.com/drive/folders/1nWMFxei5VUjNgzIzzEVpdTfz-X0wq0dY',
+            'https://rainkinginsights.com/additional-resources/',
+            'https://events2.benzinga.com/erx-gaps-workshop-may-2025-replay',
+            'https://x.com/IBDinvestors/status/1796335497255526680',
+            'https://chromewebstore.google.com/detail/stock-checkup-flaw-counte/hjjmcblclhoojiebngknemobljbjocdi',
+            'https://sites.google.com/view/petalumaibdmeetup/home/grading-the-ibd-stock-checkpu'
+        );
+
+        scrapedData.links.push(
+            'https://youtu.be/yY0MEUMIFBk',
+            'https://youtu.be/X0UwOAOyDg4',
+            'https://www.youtube.com/watch?v=9hN77lqEVwE',
+            'https://www.youtube.com/watch?v=qWMJ0fvTWdA&ab_channel=TraderLion',
+            'https://www.youtube.com/watch?v=GhKJ9P3agRc',
+            'https://x.com/gmorton512/status/1306583201855483904',
+            'https://go.screenpal.com/watch/cTfIYnnj0JZ',
+            'https://youtu.be/S0BaW2_PxwY',
+            'https://www.dropbox.com/scl/fi/80bx8tym7s9yoyq0nazf3/Double-Bottom_102808-BLKT-DB-01.pdf?rlkey=hsop0r12fvs568ti1cgkti3m2&e=1',
+            'https://www.youtube.com/watch?v=CAxpft5yJtA',
+            'https://x.com/i/status/1904045959123701929',
+            'https://www.youtube.com/watch?v=ZaEOJeODGcU',
+            'https://www.youtube.com/watch?v=fbDbwvxK-Us',
+            'https://www.slideserve.com/ariane/ibd-meetup',
+            'https://www.investors.com/images/editimg/ibded/CreateWatchList.pdf',
+            'https://marketsurge-files.investors.com/2020/04/stockguide-spring2017.pdf',
+            'https://drive.google.com/file/d/1GVwGLDpUWbvWCMJrVImDnEJWfoO7SX1U/view?usp=sharing',
+            'https://stevenedwards.trade/christian-flanders-sell-rules-trailing-stops-170-plus-account-growth/',
+            'https://youtu.be/I8Usc5lza_Y?si=FLPkyMJeeZ_mDkqv',
+            'https://stevenedwards.trade/christian-flanders-usic-champion-433-interview-notes-part-1/'
+        );
+
+        scrapedData.images.push(
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1435925455881371719/image0.jpg?ex=69125a8a&is=6911090a&hm=1dda8eab1a4177c046036adb344d92d0848ff89f94f8ceed0f83e2f03bde3dc2&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1435923661570965575/image0.jpg?ex=691258df&is=6911075f&hm=8a7c78486ec1b138744b03ad7ef9ebdaccb8a7272a4b1ee3011ccaf50f90073e&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1433717033559789609/image0.jpg?ex=69123ac9&is=6910e949&hm=42bb06e9a9e76ab740abecfacb7ec59b9e2050d2fadefd26cecb68d97122d2c9&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1429756113125117962/image0.jpg?ex=69125264&is=691100e4&hm=2f59965a0444cd76ede06e321ac95cf5ecff03aaf676471c38581194f52b9544&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1428677744526491668/IMG_20251017_163500.jpg?ex=69125a95&is=69110915&hm=141fb322d57fb32ef5cb1a47d4775654d73f5be13bf09aaa191f2d604dfc0ccf&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1428675893404110949/IMG_20251017_162700.jpg?ex=691258dc&is=6911075c&hm=a743aa7bf904fe117638c5ae419094cb7d3c036c4a723117514967e5e18535af&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1428287596408082504/image0.jpg?ex=691240bb&is=6910ef3b&hm=6d3e0439612732f293d85f861f20e7be2a8078bcf3063e07468e124e53092a05&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1427988446323937371/ScreenShot_Tool_-20251015125545.png?ex=69127ba0&is=69112a20&hm=bf8a291b54c5f6fad2259c768c0737059ba249bf33305367ad3c9cc965bd75b8&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1427929917793898507/image0.jpg?ex=6912451e&is=6910f39e&hm=f822b946050d7a9ab3ba663e9311f5227e7d283780ae1d4698ff151a5237e443&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1427549074692767888/image0.jpg?ex=6912dcad&is=69118b2d&hm=50058e5292c21b52494331737ad01e5bed6f05eeb8262d6534feea2c8c9776b1&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1427547030636462130/image0.jpg?ex=6912dac6&is=69118946&hm=a6c48a5333a2d7bad0ab25d4b4d1b8328c9f645a3e394af17a29754895e82657&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1423460335485980784/IMG-641af5c000658e5284f630102b97bb6c-V.jpg?ex=69127d3e&is=69112bbe&hm=61187f98450d0c19b591a08e8ae9f4051750cc623146f3f3694f688fe6ab1c8e&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1423460335846953040/IMG-6d751096c8fcd54c147a06ab18da561c-V.jpg?ex=69127d3e&is=69112bbe&hm=2358482c6600bc5a1c1c8d1ce233be3e30f91d438159771b1b364ab17f960721&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1423460336257732608/IMG-3859762f674e5c6e853b8df5e7df625d-V.jpg?ex=69127d3e&is=69112bbe&hm=49e4f1040046248750abf9913249ae4ef76afc6515cd425b4b2439f0a2cc62ea&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1423460336690008124/IMG-fde9a82635c72baf684af296fb6ef5ea-V.jpg?ex=69127d3e&is=69112bbe&hm=f18b9b0067db9da40a751b8d8884afa8fa966108ee796f4be1ddf84b502848f3&'
+        );
+
+        scrapedData.images.push(
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1423460337067360266/IMG-1d27561ef4d78518097642c89ca92026-V.jpg?ex=69127d3e&is=69112bbe&hm=a9d5cdb133e325c8b284bd07acf42628748446e0241179ca91cdbbdf3fa4e38b&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1423460337482727434/IMG-f5990c3e655ee6829ba824f8eb15802e-V.jpg?ex=69127d3f&is=69112bbf&hm=fae51376a5b3c9e0d24b6bcb7daeddb5b6b961a3c93354ad2c172459bcd2b275&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1423460337864282173/IMG-6b260da75c5b639e4a00ab6d574969b3-V.jpg?ex=69127d3f&is=69112bbf&hm=9ab5a4b0eb342880c69b007e7108afc8b9a5ebefc33f15ef1f5d1eeb5a029f7e&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1423460338329981069/IMG-563f7e2effaea67d7ef26eec08cd4922-V.jpg?ex=69127d3f&is=69112bbf&hm=d183c55ade83e7c6a1f3d63512001c629d5ffe9c4129cbc7e83427de2598485d&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1423460338958860318/IMG-5d83be7c58bff4f0a252a84bb3571726-V.jpg?ex=69127d3f&is=69112bbf&hm=165d947a12624745b40e3c48e0e4afdd7406f744bb86982c216dfe77ab82ed5c&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1423460339827212401/IMG-2d18bf2a59194b0b3a258b264ca0d2d2-V.jpg?ex=69127d3f&is=69112bbf&hm=f47a7e7f53fa98cdb13e19a3aa2bbe97533ac2669a91d483e901e64a8eafa5a1&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1423314721112723560/ScreenShot_Tool_-20251002152336.png?ex=69129e61&is=69114ce1&hm=121bc82b2e6e33a4560d1f7f1dfec9b58cd07e61b636fc378c00933aad1654e5&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1421904085359132754/Screenshot_2025-09-29-00-58-51-582-edit_us.zoom.videomeetings.jpg?ex=6912c29f&is=6911711f&hm=548010a7f23a30b117f04928e9e0b9c67cb7d0f7668a8d03025c07e0abec089b&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1420166564396925079/1758650071489blob.jpg?ex=69125f2e&is=69110dae&hm=fd151ab148c103ca2ccf893edbc8ed5c70d27b61ce6e07ea6ec729af53b4210d&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1420166564719759360/1758650356810blob.jpg?ex=69125f2e&is=69110dae&hm=923149b176856ed527a17c31d94682d8651b89dc53f13e26bdad3615c06e98ee&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1416364728057331732/rn_image_picker_lib_temp_4768ebb9-08ad-45b3-91be-adcbdaed10c7.jpg?ex=69126231&is=691110b1&hm=36d1cc7ff472ca9bfc7edd7da7e37fb0b80359e5b63179b721c6de54a71b6506&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1416339875099312138/rn_image_picker_lib_temp_73672dd3-7dd7-4257-85ba-88d5e91e5077.jpg?ex=69124b0c&is=6910f98c&hm=3a194b097cb2d1e8257411ae3b71c863d4e037b49df6f80f94b0aa8c9f6cfbe9&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1416336078599884830/rn_image_picker_lib_temp_9ee9bced-f367-4c5b-a8f3-90216b83ef95.jpg?ex=69124783&is=6910f603&hm=3a233c91d5c30ae138240708a8d7eda8f209775a0bb58ef8c00d99b4f4e8d3eb&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1410581131664953404/screencapture-images-squarespace-cdn-content-v1-63b5c42480db920fb66171ac-03865775-9144-44a6-beaa-789a61a2925b-Cheat-Sheet-png-2025-08-28-12_05_23.png?ex=69126fcd&is=69111e4d&hm=da8257b39caced09c8a98d13c7f8d8319e1431116931d4a3ae5a4f63d1a766db&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1410561058535637094/image0.jpg?ex=69125d1b&is=69110b9b&hm=0cc5bfeb6d4fb1ac98a9fea08d4814c5dc5bad1c39e06ba538edbdaadb3458c0&'
+        );
+
+        scrapedData.images.push(
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1409473478750638100/image0.jpg?ex=69125cb8&is=69110b38&hm=10331fdda57387f00dbddb9a229cbb0e5eae727b4a38e4d3dc01e7b15cbfe372&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1409213938083696740/GzIWLz_XIAEzLxR.png?ex=6912bc80&is=69116b00&hm=ba6fe7c085fde64fd3cfd50231d74b411a9682c55004beebfa94c2a5eac2cd0f&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1409213938679414826/GzIWL1JWEAAL7r9.png?ex=6912bc80&is=69116b00&hm=b1d3fbce3888f03ed69cc137420a9b8d2b45cbfbe939c94e1ed98b5068684aa4&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1409213939153244242/GzIWL3nXoAAbMlj.png?ex=6912bc81&is=69116b01&hm=9edc4c9616223e953fdb8f97ccf135c5b4dbda140aad38c196e2c06aebbfe118&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1409213939719602300/GzIWL2qWMAA6CO6.png?ex=6912bc81&is=69116b01&hm=e71e43ef70dca5471e6f9778353ee3da5b7ba39fd98934f500c54c9b24edd9ea&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1409093467971518494/image.png?ex=69124c4e&is=6910face&hm=8853bd90696fc380561b007a0d98069339c6d1772cb7b3499623592782bb1810&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1408709383273316362/1755931722475blob.jpg?ex=69123819&is=6910e699&hm=acfb0f948c9c810ac7b7290e13589e890c08e0ee8c43daa0e5d7c9782456cf72&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1408680766170468434/image.png?ex=6912c632&is=691174b2&hm=aa829b9faf995416908ef3dd56f9deda404cbfc790ebe33e5586d9fc27fdc03f&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1407968385689718804/image.png?ex=6912d1bd&is=6911803d&hm=380bd6ae6f8c816e9e2ed961f45b34c8ffd0c59686bb500cf386ae1f941eb83d&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1407661747938132098/image0.jpg?ex=69125ce9&is=69110b69&hm=c34be49b45aaf6f471bf34348d60d2656effeaf14e3e9243322cb7a281eb2d46&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1407659672684724247/image0.jpg?ex=69125afb&is=6911097b&hm=84dd7d539e1619a2ea4c2ffdf15c95a5d7d7667aeb8bdb4848b3bf8ff29a17b4&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1407659074190835803/image0.jpg?ex=69125a6c&is=691108ec&hm=68ab4eb27bc077cbb10c42b8ab0c782cdc50f6c56bc8bec721cc4cc32fa4349e&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1407656541443854377/image0.jpg?ex=69125810&is=69110690&hm=6f6b56790b5ece17a325189bffd6bb3c3d7de66992959ab34ff752067610aad5&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1407584663203217448/FB_IMG_1755664717138.jpg?ex=6912bddf&is=69116c5f&hm=1d6c4f7921fba7832f5bad323e5cfc9cdface4b3d995e4f1b5a6dde241840249&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1406151888864542730/image.png?ex=6912cd7f&is=69117bff&hm=209dcbf3bc02676bbc7a541fe6b05872ba56ae0eb42380713e191e2e1dddd08b&'
+        );
+
+        scrapedData.images.push(
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1405850892544118844/image0.jpg?ex=69125dec&is=69110c6c&hm=c63565cc5ee5fc112d0503cfff45cd6b9e0bfa0e993530e57f856f52b3a80a86&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1404403802173608049/rn_image_picker_lib_temp_c32eb7f9-1cae-4352-b9d1-fe9053993eb6.jpg?ex=69126036&is=69110eb6&hm=d56611e905b91117dbba785edc62104204a67de123c6035c9b0ce848ce48a04b&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1402972590691319969/image0.jpg?ex=6912714b&is=69111fcb&hm=557e39b3904cac06621250df8297f541be9587ddc68c116d538e9d2947494077&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1402923775275565156/Screenshot_20250807-085704__01.jpg?ex=691243d5&is=6910f255&hm=a68d4fcd6a2e6cfcdb046278e8642969df6eef90e2cc0568a38acf3275c2968b&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1402569435922825216/image0.jpg?ex=69124b54&is=6910f9d4&hm=73f4712f9ad2758972fb8e6c5dcaf1cfdf0bf1a8ae81197770750ea02b6a114e&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1402151874496561203/image0.jpg?ex=6912c0b1&is=69116f31&hm=5f87416579b4e0934adaea3e1a0ca1f42712d307ff5bf7b46228529ba59ffe08&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1401233247823986749/GxWbzPCXEAA8oUl.jpeg?ex=6912b4e7&is=69116367&hm=f806b5bf5a402835786f9751710c57b4640cd5646fd2ef1a93380c5a8acf6770&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1401115092581617674/image0.jpg?ex=691246dd&is=6910f55d&hm=b4de0c36b834af28dd2b532c50d4613bd1084e3b727d63e3d9e3c190e7bc1cd1&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1401114831213432883/image0.jpg?ex=6912469f&is=6910f51f&hm=fa02ba89ae6b1683618533c74e957c446d5abbe0f3d657fcd4a2e7b67948be8b&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1401114511678640168/image0.jpg?ex=69124653&is=6910f4d3&hm=9ca795369a065f63c3f5fcc197d55427ed03c53b6777ebd6f74cb791eb04be4a&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1401114197374271569/image0.jpg?ex=69124608&is=6910f488&hm=baccb07200ee8e6977fa3bfa7e6b0ba699ecebb2f03a8bc24bfe5151adff22e8&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1399690235683799060/IMG_20250729_164904.jpg?ex=69125ddd&is=69110c5d&hm=ad9ea702a9707584116f18e7fea7c9814b7e44af24d3a8b233b40d123f1b87c1&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1399074505632251954/screencapture-youtube-watch-2025-07-27-17_59_54.png?ex=6912c36b&is=691171eb&hm=a89fd953492c7d07d3f4a37cfe811cb4d48c5dd47cdbe80978d824cec57dcfc8&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1398918190456635504/image.png?ex=6912da97&is=69118917&hm=37d9c6fe8c578be1bfd986ebdc3d976c28f8068022d9d1ba686644b39ed1fc9c&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1398901861653680158/Screenshot_20250727_083556_Drive.jpg?ex=6912cb62&is=691179e2&hm=ac00eb39e8707c7f5ac2d0475d08da6aad19b3eb45eb4c316be50b7f7a197648&'
+        );
+
+        scrapedData.images.push(
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1398901861926572203/Screenshot_20250727_083515_Drive.jpg?ex=6912cb62&is=691179e2&hm=490a8f344bf484fc1668021896956eaa112716b30b7670627383d5bfe26090fb&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1398901862169575528/Screenshot_20250727_083437_Drive.jpg?ex=6912cb62&is=691179e2&hm=f1abe9fda81e1e0776fdf234d258397d326f0f689994eb5b8751406d903e4b05&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1397923742629498942/unnamed_2.png?ex=69128830&is=691136b0&hm=fc7d4753cdb45c5fd8a20bb2b2977df989918cd3f28571ca57c7ea4e714ad1d7&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1397923743036084345/unnamed_3.png?ex=69128830&is=691136b0&hm=bb0eb6ad9696d0b5e0d060387a4dc410aeeceffedf8f25682bef878d8c8dd1ae&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1397882102741205125/image0.jpg?ex=69126168&is=69110fe8&hm=c5a6d4135af1c569e083b692543edcc589bc4239238006b6e0f1c31dc0e01cd9&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1397508324085465199/IMG_20250723_161734.jpg?ex=691256cc&is=6911054c&hm=2f9065f335d44a50b6dfadd602f5fd533dc793ac87ddb489dd9850e016ae2bbc&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1397083885182910564/image0.jpg?ex=6912c5c2&is=69117442&hm=cf06f720a64ffdc29377c0572ca0c519dccf7791c4429b592bb474b967c7006c&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1397083013363269804/image0.jpg?ex=6912c4f2&is=69117372&hm=652ed0807f4979ade2069c75936061e0e5314cb8a3135ff0bdfc60f7bc176c58&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1397081859728605235/image0.jpg?ex=6912c3df&is=6911725f&hm=3836c0cafe4e00ea6417a93b006fb9cf45d87dbc96d5f4e0d535f36bb0d45461&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1397079657630666854/Screenshot_20250722_075440_Drive.jpg?ex=6912c1d2&is=69117052&hm=bcf88cf9e1d5e3030c55ecfeee006d7fe936957045579b448825cea7cc4f395a&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1397078080480215183/image0.jpg?ex=6912c05a&is=69116eda&hm=818a686b1e043282ae31f193394974c40209b1f8098e36874dafaba87841cc25&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1397012344789270698/image0.jpg?ex=69128322&is=691131a2&hm=ffe91facab0958a588f13a436e6c2d697fb0eb766fdf19614793d60ae03f7447&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1397008869531586692/image0.jpg?ex=69127fe5&is=69112e65&hm=54690b3ce6b5f182b6142831f0b76edc945a50ed34bdf27927cf542a5512fcf8&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1397005857740292318/image0.jpg?ex=69127d17&is=69112b97&hm=ab4ac29a70cd5e208e0ac490af2929bdbef0cd8f5e03c3513f0f26dd44ff2b72&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1396454560536723529/image.png?ex=691275e8&is=69112468&hm=95017795f577c83e5185a126763295b4a3e66502fb89c178eee0348223169956&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1396448005518921868/image.png?ex=69126fcd&is=69111e4d&hm=d2bedcbf1d9967cb1bde6d3ff783f5b28fa20f9087c500ad50b7af694d76dacf&'
+        );
+
+        scrapedData.images.push(
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1396411141286264913/image.png?ex=69124d78&is=6910fbf8&hm=d98c489c870101af5084211faf4b8c1ce637e87c5cb50a8af910cb8c4735f8f9&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1395358609248092321/IMG_20250717_175618.jpg?ex=69126db8&is=69111c38&hm=ca090db39b6c139c2ef2b47e30013625d4f8e0fdc42ae331800decb35139ded6&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1395238390160560148/image0.jpg?ex=6912a682&is=69115502&hm=a61ed1641c3ebc5cbbc5728c6b8049d006af58d62b2988a8bef4ecbcbcd21e44&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1395235597706334228/image0.jpg?ex=6912a3e8&is=69115268&hm=4c1246d76b3c97d88b8a1ae9daa13f73d4f08cdcc6e4bb578014efb53083a1ee&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1395230085312938226/image0.jpg?ex=69129ec6&is=69114d46&hm=5d1942065b795870457b8da81a6cbf10ea3151e77562caf649debd11cf611b10&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1394628104189902929/rn_image_picker_lib_temp_fc6ac58f-9372-4875-a2dc-26a18f93537c.jpg?ex=69126862&is=691116e2&hm=ade32fcd3309acf4ecfc8095806b46cd409e6fd57810e4f47681bcf1995934c8&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1394623384775819285/rn_image_picker_lib_temp_bc4c889b-a446-457c-9568-bdc22be31e8f.jpg?ex=691263fd&is=6911127d&hm=b374a286af14593070091339b5679ed774152e0107dff704a6471928776e6076&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1394266148975022200/image.png?ex=691268ca&is=6911174a&hm=60012093007e57b96e06d4b7531f695b78e3c2148870b675be58849edf0e4fcf&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1393053698313420860/image0.jpg?ex=69129cdb&is=69114b5b&hm=a6791bf18a7454c373dcf4fd0fa1facd185893940ad22f10ec2adcbac199b976&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1389176445040984115/IMG_20250630_173102.jpg?ex=691259a2&is=69110822&hm=9c0d48db180d9278f0f6c400b3c558881fcc8958cca09fdb51ca58a592b2f0eb&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1389160462167441488/IMG_20250630_162725.jpg?ex=69124abf&is=6910f93f&hm=a7504b3959de4a1f5980749308f291e53a3a94143b4485fa61a58ba5c8305015&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1387006783020732436/IMG_20250624_174924.jpg?ex=69125dfa&is=69110c7a&hm=0278a0a85925f9ad50a001d8ff31cc88b4b70b9708423b77606925a8d8e4bd6c&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1383840828371370164/image.png?ex=6912b6f4&is=69116574&hm=7dd256a978d45c52fb545ed9054077a6892da45715f41bdd9add2fb8be4a556e&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1383840828660650205/image.png?ex=6912b6f4&is=69116574&hm=9c231d73b6baf6a98c42d8372efa6bf1c01c787ff5f5a72be74d4fae134a22de&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1383840828920827995/image.png?ex=6912b6f4&is=69116574&hm=c2ea5b3da5e9b191ef6f494da69c422923d3033a77f9d43a9b133c2d10ecfe0b&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1382755183947153489/image.png?ex=6912b85e&is=691166de&hm=b82633357395441527a078ae5d29be47e0237cefbfe91e8d9639cd4c329548fc&'
+        );
+
+        scrapedData.images.push(
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1382285756759937044/image0.jpg?ex=691254ae&is=6911032e&hm=ae26b4fa5864aa54ef9b80a97fd4eefdae35577e6fbabd95af2d85a0164cd995&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1382276049366421554/image0.jpg?ex=69124ba3&is=6910fa23&hm=cd75dcf64cce9c9dd3ffa4faa9154c88ee4535af52f51feb6c02e8f8b3903cb3&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1382229803997859920/image.png?ex=6912c951&is=691177d1&hm=3f22b7c25c4825757fc646bbf502d5299dbc6ce5b178dd2c129fc0767ad8949f&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1382162738763010108/image.png?ex=69128adc&is=6911395c&hm=5b2c6f5cd3f2cc8acaf1c7ff26ecd1beed83736a92892b69ea23787a77b48af0&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1381163622335647905/image0.jpg?ex=6912dcdc&is=69118b5c&hm=67fbb697274e45b8f04e2deed4a6f5a1664d3ff4ad21d024ea4866e7f2bf17cb&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1380105075690573834/IMG_20250605_164420.jpg?ex=69124ec3&is=6910fd43&hm=2c9cb7240bc058bf68149fae2cbab9af77a934597b89d4842084d4df3e966a13&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1378962231819112458/GsYLvQKbYAAHr8C.png?ex=6912c3a7&is=69117227&hm=ebd2a5522fda07e7d7ce20ddeb64e1c8b8311bc676316332968fb5d146df3cc7&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1377906929011134524/IMG_20250530_150941.jpg?ex=69123894&is=6910e714&hm=5160d533ee7b0176531df7ef4a7f6a6503f02d8e2368e08ee62142f3f8e95da9&'
+        );
+
+        scrapedData.videos.push(
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1407441494733885550/AMA_with_Matt_Caruso_2025-08-18_20_00_55-mixed.mp4?ex=69123889&is=6910e709&hm=e20467705c59af5fd7b511d4e3ebcdaa5bfaeb362ef9eccdaf37582a1e15a52f&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1399722049014071306/John-Pocorobba-TickerMonkey-Earnings-Reaction-Gaps-Masterclass-Workshop-5.mp4?ex=69127b7e&is=691129fe&hm=878dc3225f2511f2b8739f5421a332fcdc156cd07135e334e3dffaf6e5173db5&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1399722058929405973/John-Pocorobba-TickerMonkey-Earnings-Reaction-Gaps-Masterclass-Workshop-6.mp4?ex=69127b80&is=69112a00&hm=3e5297e17e7b68bd506f070fc1741bc8135bb6e12dd31790157caccb889a8d5c&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1399720951930814595/John-Pocorobba-TickerMonkey-Earnings-Reaction-Gaps-Masterclass-Workshop-1.mp4?ex=69127a78&is=691128f8&hm=a46c49d736b677e97b508253fdf2da117e349b0ac61846228030c4d60bbfe495&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1399720955542245446/John-Pocorobba-TickerMonkey-Earnings-Reaction-Gaps-Masterclass-Workshop-2.mp4?ex=69127a79&is=691128f9&hm=4a2174f0f7350b98a100e94bc167623aa5eda69621d7fbda2ea62385ef72d1cf&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1399720961867251754/John-Pocorobba-TickerMonkey-Earnings-Reaction-Gaps-Masterclass-Workshop-3.mp4?ex=69127a7a&is=691128fa&hm=115394572ae8e2366b1a8e006f8beabfc798f928b6f891bfb889a68922bd5174&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1399720969362214942/John-Pocorobba-TickerMonkey-Earnings-Reaction-Gaps-Masterclass-Workshop-4.mp4?ex=69127a7c&is=691128fc&hm=e326dfb0e5ca946384ec79fe8695b1e5117e23c45484d71a8709b4bd76cbfb0f&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1398639562972069899/8_Selling_the_Best_Stocks.mp4?ex=69127fd9&is=69112e59&hm=6bf22c9920d8ca42e8baa4064c1372adf87d08733a56930c1e532782b77b5a70&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1398639564201132073/9_Selling_Slower_Movers.mp4?ex=69127fd9&is=69112e59&hm=315336611e5fc8c3cba29abfbecc5665bee2cb690a6da3c6dc13678554d4f4aa&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1398639565706625125/10_Market_Direction_and_Stock_Impact.mp4?ex=69127fd9&is=69112e59&hm=2a6bf964f234f537bd6794bfb9ca20799513abff9b15a3f5197b3195a717c07d&'
+        );
+
+        scrapedData.videos.push(
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1398639567837593711/11_Avoiding_Fear__FOMO.mp4?ex=69127fda&is=69112e5a&hm=db0c9096ff19bd13c63a00a2e5ca1f8a1c55345d3f47540d25965ca80c1324c1&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1398639570756571247/12_Earnings_De-Risking.mp4?ex=69127fdb&is=69112e5b&hm=030d07d357285a6a9e1c5a6f94f206b48ab0b99b4894b14bac0552c19cdb3d63&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1398639052672077904/5_Failed_Breakout_Pullback_Setup.mp4?ex=69127f5f&is=69112ddf&hm=2bcc991f1f7fac65dbc95c0d36d4b4962cd235e7d8e296b76dda51fd7c3dc997&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1398639054412578857/6_Mini_Coil_Setup.mp4?ex=69127f60&is=69112de0&hm=890d85333c25541aebd0a3d742cb344e567561d0d47473cd6490acdf2e0ee882&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1398639055658287114/7_Dollar_Stop_Concept_-_Building_Concentration_Safely.mp4?ex=69127f60&is=69112de0&hm=969dd01147c59d3d1af4b3cb9cbfa07b65af4066410b197a84433affdad46964&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1398638833943318578/2_Stock_Bases.mp4?ex=69127f2b&is=69112dab&hm=d2486f914385e4a59870f39238967657f1a8436e16def989a9205ac45c281da1&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1398638836120293479/3_How_to_Evaluate_a_Base.mp4?ex=69127f2b&is=69112dab&hm=4bc66c4686b70f64a9aeb13eb7f3360b26ff3b428d64047018e671b8850c3270&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1398638838485745725/4_The_Risk_of_Breakout_Buying.mp4?ex=69127f2c&is=69112dac&hm=61d965d564f93a9dec1bb5041fe5fc6bbbfae34139eb2ae6d811dff410973e9e&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1398631313774481479/2_What_to_expect-_Past_Winners.mp4?ex=6912782a&is=691126aa&hm=b7d9005cf12cab47f3c06bb33c6a6138ca121fb9ca2d6fab1dc12f9e2c243c4d&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1398631315091230771/3_Risk_Principles.mp4?ex=6912782a&is=691126aa&hm=c35e78ad1eab3186e0adce1ca93c9c568b255417b688e48f21b22c1a3b24a828&'
+        );
+
+        scrapedData.videos.push(
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1398631316043333652/4_Fallen_Angels.mp4?ex=6912782b&is=691126ab&hm=7384df7f1bca362ffc122b787df5689e2f7034febf7c6d6e1560e1121e9a6799&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1393919869002711150/Modern_Day_Top_Trader_Eve_Boboch.mp4?ex=691277ca&is=6911264a&hm=ce068a81918fac1b4ad135d082ebc6fb4b9fbfcc9141128db9eeedfa54051007&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1392095817191395351/4._COVID_Crash.mp4?ex=69126c82&is=69111b02&hm=45b9640f8efa4745feea9f329de83f712ac2efaeae386fb67d91e1e92bbe9203&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1392095553114079253/3._AAPL_Apple.mp4?ex=69126c43&is=69111ac3&hm=508b1272c76e2826bdca51665846f7177c34deda4998e829b4fc202458095895&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1392094549509406720/2._Deck_Deckers_Outdoors.mp4?ex=69126b54&is=691119d4&hm=ef289c6362a3c2c22311863abe514481905959698ef642b6e56e03af783d1490&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1350702746646610040/653Qu1WI89zA_I-U.mp4?ex=6912c9f5&is=69117875&hm=0e3f27f50329ebf4266deaed440aad0313c41facd1a4529c730c964065524836&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1346834690388135986/Lose_Correctly_To_Win_In_Trading.mp4?ex=69128f4d&is=69113dcd&hm=eb05b9b1cb83971b781c1ff27e8a5f8f2f095acbcfef7c7b5fd0cefb2fa74062&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1346387714559447040/stage4.mp4?ex=69124085&is=6910ef05&hm=9ed56b185470fed1130736bb1f5750b8b02de5cd52788657f8f0d4f59e00dd90&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1334796213383331850/Ochpya2yiCZux12i.mp4?ex=69124518&is=6910f398&hm=8a0e87291ab6a236f688605db0ee6c2b641ca28b6b5021c8ea5b9aa4d12aec5d&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1334795675468042301/o_QVUK5oJTQ3-eUm.mp4?ex=69124498&is=6910f318&hm=8625f96e7ca12289f4258fcf2958ca8ae1d5d60675e7718573961a2eb06e6780&'
+        );
+
+        scrapedData.videos.push(
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1329336225378861086/yPy3g08vdJhxaJVc.mp4?ex=6912d756&is=691185d6&hm=5986377d1898c92359e8a98bb8764afc9d1408e698576be6ccfd3b3e9c89a3bd&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1329335593531998260/HtaeC9_6a5eB3lDL.mp4?ex=6912d6bf&is=6911853f&hm=1ca97310e5af0fd82aff88333aa2e09d012ffecfb337b82689fb7c6e214dce43&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1328703784356020325/John-Pocorobba-TickerMonkey-Earnings-Reaction-Gaps-Masterclass-Workshop-5.mp4?ex=69128494&is=69113314&hm=ee773c371129ae35f6aa09b555ab324afa69ca8dedb8e6ab24408ef0747e9b8e&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1328703796456591430/John-Pocorobba-TickerMonkey-Earnings-Reaction-Gaps-Masterclass-Workshop-6.mp4?ex=69128497&is=69113317&hm=524fbdabe4fdae501e67de0d2d077e976b4b306ebe498c35d72526bbab89e66a&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1328702020445667328/John-Pocorobba-TickerMonkey-Earnings-Reaction-Gaps-Masterclass-Workshop-1.mp4?ex=691282ef&is=6911316f&hm=6d1d239944182d0aace4e12b8ec8a38313fbbf40d0025ce761e5e91815345ff8&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1328702024497233940/John-Pocorobba-TickerMonkey-Earnings-Reaction-Gaps-Masterclass-Workshop-2.mp4?ex=691282f0&is=69113170&hm=1665eca23cc96ff6b1b23d5653d44eca0652bd8a2989de44da4ae2209df1ecb5&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1328702030927233044/John-Pocorobba-TickerMonkey-Earnings-Reaction-Gaps-Masterclass-Workshop-3.mp4?ex=691282f2&is=69113172&hm=9abb766451220656e9e3bdd70f07713d84f9ef1232f932acc2ca96932832e3b1&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1328702038858530826/John-Pocorobba-TickerMonkey-Earnings-Reaction-Gaps-Masterclass-Workshop-4.mp4?ex=691282f4&is=69113174&hm=c431b9fa8a0579c980af63bdc5d525610a48699daefad992a10d9a58e95b958b&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1328622495044997130/soIg1g1UIbAL0oKw.mp4?ex=691238df&is=6910e75f&hm=884eddb5b41378c4a0b210783ea79883e0ce0a027d3221cc7e73c37aed735211&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1324383476153323520/IBD_-_Level_3_-_Disc_2_-_Track_2.m4v?ex=69129efa&is=69114d7a&hm=50d02a4a14f6dd8e77a538526dbf5019bf7b7df95f8b3fbff7c02a3dd627ca48&'
+        );
+
+        scrapedData.videos.push(
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1324383476618629161/IBD_-_Level_3_-_Disc_3_-_Track_1.m4v?ex=69129efa&is=69114d7a&hm=dd1c1289058422eb1b3920a94eece17a0c8acba54229898edc32501ea27d03ca&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1324382480806969407/IBD_-_Level_3_-_Disc_1_-_Track_1.m4v?ex=69129e0d&is=69114c8d&hm=bdb580c2be429a7b56f36ef9dc5b14d67ccf2dd4f728deaec7180d2a0cf859c5&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1324382481272672318/IBD_-_Level_3_-_Disc_1_-_Track_2.m4v?ex=69129e0d&is=69114c8d&hm=cb5cc854655b07cfe7b61e3beb4322c1eebb08769849da3643da5530135ee3f1&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1324382481683710015/IBD_-_Level_3_-_Disc_2_-_Track_1.m4v?ex=69129e0d&is=69114c8d&hm=7ffa909c0af11ffe8bf627edc4799e463257f0f269cb0a78f5a490a6e738d682&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1324381072720658530/13-Putting_It_All_Together.mp4?ex=69129cbd&is=69114b3d&hm=dc4de4338d4f04d928e8c21f0a8e923b00432737e881061fa85d98dd6dcaa021&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1324381084430893127/14-What_If.mp4?ex=69129cc0&is=69114b40&hm=561f6411627d87c795b1f859fcd754417a3daea772916152359c8ad34337810c&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1324381089766047846/15-The_Art.mp4?ex=69129cc1&is=69114b41&hm=49e7de8594b4fcb5a2b3e4c502e79ccb36fa36a6a9ed78f97ac06839f220459e&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1324379257454985289/08-Distribution.mp4?ex=69129b0c&is=6911498c&hm=67c31e3d913078083021999410858af46dc77675c72ae94ce5826f9b184ce07e&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1324379261670264862/09-Market_Exposure.mp4?ex=69129b0d&is=6911498d&hm=904b3d57708f763d69b984041a243dfc5674c52c821ad62a37120c5e6b13e1e5&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1324379264304287797/10-Buy_Switch.mp4?ex=69129b0e&is=6911498e&hm=b1b2e09951d6bf34b1fd80f78a2141464f9b3bd7b9ca23c8d9699baa9df0dfff&'
+        );
+
+        scrapedData.videos.push(
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1324379267907190795/11-Restraint_Rule.mp4?ex=69129b0f&is=6911498f&hm=4ec5b0abcbbf5309b56344d80b5635931087a89c2df7bc0a39d936e9663376cd&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1324379271111643268/12-Power_Trend.mp4?ex=69129b10&is=69114990&hm=97c9732848bc84becdea62fc4668b32b0967995b1016463eb5c5950a6e4824d4&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1324376594856542272/01-Introduction.mp4?ex=69129891&is=69114711&hm=23eca1a0eab9a0c1da885f892b971e16fc0acfcaac5b30cf76bf1f3375a79710&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1324376597117276200/02-Follow-Through_Days.mp4?ex=69129892&is=69114712&hm=5a942ebe47bf73f1ce9e09ecebee129b656c00bcd58ebc4149f0f69d10503154&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1324376601315770448/03-Follow-Through_Days_and_Failed_Rally_Attempts.mp4?ex=69129893&is=69114713&hm=399aef08d0775aa5999b40f054ea9055d8faeed9ffc9590712c5476204d88b34&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1324376606554325032/04-21-Day_Moving_Average.mp4?ex=69129894&is=69114714&hm=b9b9c2151fac093fd2dc929f9b1e40b822c0d81c962cfc1d408db5807bb1ef7a&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1324376611063206008/05-50-Day_Moving_Average.mp4?ex=69129895&is=69114715&hm=a78213e7ff345c6c3e18733420d3aa87557e9dd66bb45de1ca9f8635ab55e362&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1324376614586421320/06-Strengths_and_Weaknesses.mp4?ex=69129896&is=69114716&hm=9bb30521df3637338e95e6c35eb4876d251c00cd8c503a854d903c93bd1b85db&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1324376618826727484/07-Downside_Reversals.mp4?ex=69129897&is=69114717&hm=17008ec526c87ae388e5b19024da8dfe1abb3473e32a228c8dd162754bd631cd&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1321082827961405461/MODEL_STOCK_HOME_STUDY_2_T10_C01.m4v?ex=69127a82&is=69112902&hm=526d1a0722502594415b82a0e7d88c708958dd06c97405504f28213a02883adf&'
+        );
+
+        scrapedData.videos.push(
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1321082083816374395/MODEL_STOCK_HOME_STUDY_2_T6_C01.m4v?ex=691279d1&is=69112851&hm=17cfb23c2a1c404ea1e9c4b3b11c50484b4bb2f7675afe0547d5f9aab709ab74&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1321082084311175208/MODEL_STOCK_HOME_STUDY_2_T7_C01.m4v?ex=691279d1&is=69112851&hm=5db30f08706f43b76ceb23e57d3cbe02a73784890b3b5521110aad796b3fb061&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1321082084709761056/MODEL_STOCK_HOME_STUDY_2_T8_C01.m4v?ex=691279d1&is=69112851&hm=db188005754eb8cb1849c3a9af8f21b350dfb442e65b5a92fc041d78a6f5ab61&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1321081752235544586/MODEL_STOCK_HOME_STUDY_2_T1_C01_CHARLES_SCHWAB.mp4?ex=69127982&is=69112802&hm=d4c5e2fdf89d0f9331cca386de3610c9b9600de7a8076c9e211cc14ee90d867d&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1321081752906891324/MODEL_STOCK_HOME_STUDY_2_T2_C01.m4v?ex=69127982&is=69112802&hm=0612d97101ecf4caef1454f8f1d6e2e8b7a355aef55947bf3c7b1f6e1b348a20&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1321081753586241566/MODEL_STOCK_HOME_STUDY_2_T3_C01.m4v?ex=69127982&is=69112802&hm=6211fae86e3f3b6247917b144da6be9e94e4af57f8475b84ca244ee28edfda23&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1321081659105345606/MODEL_STOCK_HOME_STUDY_2_T4_C01.m4v?ex=6912796c&is=691127ec&hm=ea6d7f39ecf5675e6924ec672667e047826fcf4ded2464172e1d34864dadd229&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1321081659977895999/MODEL_STOCK_HOME_STUDY_2_T5_C01.m4v?ex=6912796c&is=691127ec&hm=069cbebbe7f4c9266e1076ef51cfcf4b291d30ed77ca49adccc16847548ebd6d&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1321081598082551850/MODEL_STOCK_HOME_STUDY_2_T9_C01.m4v?ex=6912795d&is=691127dd&hm=8fc712bda771853e229ae64362ebc68f8d265957b42505210c1c125341010921&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1321071668273221704/MODEL_STOCK_HOME_STUDY_1_T11_C01.mp4?ex=6912701e&is=69111e9e&hm=ed7276f11ee45ac56dedb3949abee3e6f7b4c1018e6728431edda606c072a54b&'
+        );
+
+        scrapedData.videos.push(
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1321071669271597066/MODEL_STOCK_HOME_STUDY_1_T12_C01.mp4?ex=6912701e&is=69111e9e&hm=cf1194fd54e9fd1b4e9b7e55e068c3bdbf0976f22da310fb5a6a0a1141ee5307&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1321071670164852736/MODEL_STOCK_HOME_STUDY_1_T13_C01.mp4?ex=6912701e&is=69111e9e&hm=ed30b99f8853a8f8b5428c4193bd77069e854c9a1c7187a338878a96c933ecd5&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1321070944906772502/MODEL_STOCK_HOME_STUDY_1_T9_C01.m4v?ex=69126f71&is=69111df1&hm=57e790508ce15257c8b47763b71cc25629c339858176c478daea3d33f3afa84f&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1321070945385054228/MODEL_STOCK_HOME_STUDY_1_T10_C01.m4v?ex=69126f71&is=69111df1&hm=cc5b63e5534b96e60cf4b67127b1dfde3588e9baa7dedb066de665ae45c9a8ba&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1321070946056147004/MODEL_STOCK_HOME_STUDY_1_T11_C01.mp4?ex=69126f71&is=69111df1&hm=907068fd4514cb79c513b039c2e430dd10955c999b4cd2fe8a83700cd7097ff8&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1321070241455018024/MODEL_STOCK_HOME_STUDY_1_T7_C01.m4v?ex=69126ec9&is=69111d49&hm=149ef669a504cca5cfc0bc14d35121df3f220abacc96a101ae5daaf4a55216c0&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1321070241983369236/MODEL_STOCK_HOME_STUDY_1_T8_C01.m4v?ex=69126ec9&is=69111d49&hm=2bccf3ccabfc43a653bccc9d438381c19ecf63e0f9b3969356cee96ce9af49de&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1321066871977676810/MODEL_STOCK_HOME_STUDY_1_T6_C01.m4v?ex=69126ba6&is=69111a26&hm=524104ce0c72a05bc27b30a059a37f85552a1c7ef6510b248d66f7a80d003855&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1321065209351241860/MODEL_STOCK_HOME_STUDY_1_T4_C01.m4v?ex=69126a1a&is=6911189a&hm=d89c12574de8ab38c877a36c86f958ba9224f2908e4b8670af854e9f2f8b6ccc&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1321065209741185036/MODEL_STOCK_HOME_STUDY_1_T5_C01.m4v?ex=69126a1a&is=6911189a&hm=e8df1bd72cf8ea15ba9fe4191f5643d891bf97a68487c43c35e15c4a15ddafa4&'
+        );
+
+        scrapedData.videos.push(
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1321065167202549811/MODEL_STOCK_HOME_STUDY_1_T3_C01.m4v?ex=69126a10&is=69111890&hm=abf24fc07e4c8d7cb12a630abd31252ec2b83a23b5a8ad3d4188ef0a7c95639b&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1321063415233511455/MODEL_STOCK_HOME_STUDY_1_T1_C01.m4v?ex=6912686e&is=691116ee&hm=f3c7b1386d68ae908a828b1acc658d2f84dc843d275c8b8c99de0785d6b104a4&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1321063415816650752/MODEL_STOCK_HOME_STUDY_1_T2_C01.m4v?ex=6912686e&is=691116ee&hm=3d82f3274dbe0f1ba5191491b6c36d849b403e108d41a8459103a092dcba116d&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1321026732567822428/Mc3-GIwcUpTwQ8kt.mp4?ex=69124644&is=6910f4c4&hm=cc3615d9778639f8dcd087f4e1e7db18fe2dd65028d783c7eae9f2f3876b4f77&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1290538838632169532/oIeFvNzqb_Fj4luk.mp4?ex=6912c2f4&is=69117174&hm=ff83a074a3c1a820eadc3d97a65480de3e54f8831942c27676de0d65a55da396&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1289821571988324453/SRGzYtaS0mQVEK70.mp4?ex=6912c9f2&is=69117872&hm=37d4931afc3ebd8c59a85321fffcab954768ae0de91f862149f66969c656bb95&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1289089644499177513/Ospgj2lRoct_-vFM.mp4?ex=6912c349&is=691171c9&hm=5d602f7245bc628271c6906628449f7607c79d5de07318595a5f7c7b91c9216e&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1284756860817248318/0tbQ_ZHA4VXJyt9q.mp4?ex=6912d211&is=69118091&hm=1ab12b94cdf017e822851890a4c13a9b7dedb7d667e84766e979566ccb46b9de&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1283303773804040192/ftd.mp4?ex=6912cec6&is=69117d46&hm=728319c4c34716b0b771e3a1b1524e0f18f2faab077c4764d9b8c405de0124b5&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1280037650723770388/dScpHtyOxzh-uNNZ.mp4?ex=6912ca75&is=691178f5&hm=a30a93626fc16682ad342479453047175193b5b3be399ab6e1f9ad3eadf7f345&'
+        );
+
+        scrapedData.videos.push(
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1278019558384341126/Ted_Zhang_4th_interview.mp4?ex=6912b337&is=691161b7&hm=feb51844e8c5d62c529bbf7cc46f5e259ad4745e909bc6b9120394493dc29c3e&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1278019511500541973/Ted_Zhang_3rd_Interview.mp4?ex=6912b32b&is=691161ab&hm=e6be97fba9b396e67389855a3ce3631bf1898ae8c41509d45906b713ba8cd83d&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1278019257405280336/Ted_Zhang_2nd_Interview_8723.mp4?ex=6912b2ef&is=6911616f&hm=e111fc8b72f45a5034ba3b2dc88beb988da7e7480bddf7f5e7a992d82771bbb4&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1278018649852219477/Zhang_1st_interview.mp4?ex=6912b25e&is=691160de&hm=63c363d1396bd175bce674d219e36639e62b0b4694e8d4ab2173380757f17c1f&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1276858163420729394/Day_4-5_-_Mind-Blowing_Math.mp4?ex=69126e15&is=69111c95&hm=358322f95cacef40735fc3e99521788db0d2ada3cb6c7ff9aadcddbda4f0ede1&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1276857268750647316/Day_4-4_-_Post-Trade_Analysis.mp4?ex=69126d3f&is=69111bbf&hm=7243f77766ed21964d2b637c81bccae69783280bf17564ea1c3279c46a1ef214&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1276856774023975019/Day_4-3_-_Position_Sizing.mp4?ex=69126cc9&is=69111b49&hm=473106302bf44eb394615505bf9db05f9b8532afbe546a87ac4421a5d4cc88a4&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1276854239540285525/Day_4-2_-_Progressive_Exposure.mp4?ex=69126a6d&is=691118ed&hm=15e73bf5b97eabbf79e17942222b27bbd4ff890ed6d3a4206640cd76cb84dc6b&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1276852180049068135/Day_4-1_-_Risk_Management.mp4?ex=69126882&is=69111702&hm=950cca7609a5a3d75c43b639a18998cc14fa1641f407bd58ae42cec69b04dd5b&',
+            'https://cdn.discordapp.com/attachments/1259392713174814816/1276779947394076682/Jack_Schwager.mp4?ex=6912cdfc&is=69117c7c&hm=fd12574baaa9173b7cb2785a034738a9db1d738865f9bb2164ec3ce5c641453a&'
+        );
+
+        const PDF_WORKER_SRC = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.worker.min.js';
+        if (window.pdfjsLib && pdfjsLib.GlobalWorkerOptions) {
+            pdfjsLib.GlobalWorkerOptions.workerSrc = PDF_WORKER_SRC;
+        }
+
+        const lightboxState = { container: null, image: null, caption: null };
+        let supportTimer = null;
+        const youtubeTitleCache = new Map();
+
+        document.addEventListener('DOMContentLoaded', () => {
+            setupLightbox();
+            scheduleSupportModal();
+            populateDashboard(window.scrapedData || scrapedData);
+        });
+
+        function populateDashboard(data) {
+            const safeData = data || { links: [], images: [], videos: [] };
+            const uniqueImages = uniqueList(safeData.images);
+            const uniqueVideos = uniqueList(safeData.videos);
+            const { pdfLinks, youtubeVideos, otherLinks } = categorizeLinks(safeData.links);
+            const imageItems = uniqueImages.map(src => ({ src, label: buildImageLabel(src) }));
+            const videoItems = uniqueVideos.map(src => ({ src, label: buildMediaLabel(src) }));
+
+            renderPdfGallery('pdf-list', pdfLinks, 'No PDFs available yet.');
+            renderLinkList('other-links', otherLinks, 'No other links available yet.');
+            renderYoutubeVideos('youtube-videos', youtubeVideos, 'No YouTube videos found.');
+            renderGallery('images-gallery', imageItems, 'image', 'No images to display.');
+            renderGallery('videos-gallery', videoItems, 'video', 'No videos to display.');
+        }
+
+        function categorizeLinks(links = []) {
+            const pdfLinks = [];
+            const youtubeVideos = [];
+            const otherLinks = [];
+            const seen = new Set();
+
+            (links || []).forEach(rawLink => {
+                if (!rawLink) return;
+                const link = rawLink.trim();
+                if (!link || seen.has(link)) return;
+                seen.add(link);
+
+                if (isPdf(link)) {
+                    pdfLinks.push({ url: link, label: buildDocumentLabel(link) });
+                    return;
+                }
+
+                const youtubeId = extractYoutubeId(link);
+                if (youtubeId) {
+                    youtubeVideos.push({ url: link, id: youtubeId, label: buildYoutubeLabel(link, youtubeId) });
+                    return;
+                }
+
+                otherLinks.push({ url: link, label: buildGenericLabel(link) });
+            });
+
+            return { pdfLinks, youtubeVideos, otherLinks };
+        }
+
+        function renderLinkList(containerId, items, emptyText) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            container.innerHTML = '';
+
+            if (!items.length) {
+                const li = document.createElement('li');
+                li.className = 'empty-state';
+                li.textContent = emptyText;
+                container.appendChild(li);
+                return;
+            }
+
+            items.forEach(item => {
+                const li = document.createElement('li');
+                const titleLink = document.createElement('a');
+                titleLink.className = 'link-title';
+                titleLink.href = item.url;
+                titleLink.target = '_blank';
+                titleLink.rel = 'noopener noreferrer';
+                titleLink.textContent = item.label;
+
+                const urlCopy = document.createElement('span');
+                urlCopy.className = 'link-url';
+                urlCopy.textContent = formatDisplayUrl(item.url);
+
+                li.appendChild(titleLink);
+                li.appendChild(urlCopy);
+                container.appendChild(li);
+            });
+        }
+
+        function renderPdfGallery(containerId, pdfs, emptyText) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            container.innerHTML = '';
+
+            if (!pdfs.length) {
+                const msg = document.createElement('p');
+                msg.className = 'empty-state';
+                msg.textContent = emptyText;
+                container.appendChild(msg);
+                return;
+            }
+
+            pdfs.forEach(pdf => {
+                const card = document.createElement('div');
+                card.className = 'pdf-card';
+                card.tabIndex = 0;
+
+                const thumb = document.createElement('img');
+                thumb.className = 'pdf-thumb';
+                thumb.alt = `${pdf.label} preview`;
+                thumb.src = createPdfPlaceholder(pdf.label);
+
+                const title = document.createElement('div');
+                title.className = 'pdf-title';
+                title.textContent = pdf.label;
+
+                card.appendChild(thumb);
+                card.appendChild(title);
+                card.addEventListener('click', () => window.open(pdf.url, '_blank', 'noopener'));
+                card.addEventListener('keypress', event => {
+                    if (event.key === 'Enter') {
+                        window.open(pdf.url, '_blank', 'noopener');
+                    }
+                });
+
+                container.appendChild(card);
+                loadPdfThumbnail(pdf.url, thumb);
+            });
+        }
+
+        function renderYoutubeVideos(containerId, videos, emptyText) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            container.innerHTML = '';
+
+            if (!videos.length) {
+                const msg = document.createElement('p');
+                msg.className = 'empty-state';
+                msg.textContent = emptyText;
+                container.appendChild(msg);
+                return;
+            }
+
+            videos.forEach(video => {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'media-card youtube-card';
+
+                const heading = document.createElement('h3');
+                heading.textContent = 'Loading title…';
+
+                const iframe = document.createElement('iframe');
+                iframe.src = `https://www.youtube-nocookie.com/embed/${video.id}?rel=0&modestbranding=1`;
+                iframe.frameBorder = '0';
+                iframe.allowFullscreen = true;
+                iframe.setAttribute('loading', 'lazy');
+                iframe.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
+                iframe.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share');
+
+                fetchYoutubeTitle(video).then(title => {
+                    heading.textContent = title;
+                }).catch(() => {
+                    heading.textContent = video.label || `YouTube Video (${video.id})`;
+                });
+
+                wrapper.appendChild(heading);
+                wrapper.appendChild(iframe);
+                container.appendChild(wrapper);
+            });
+        }
+
+        function renderGallery(containerId, items, type, emptyText) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            container.innerHTML = '';
+
+            if (!items.length) {
+                const msg = document.createElement('p');
+                msg.className = 'empty-state';
+                msg.textContent = emptyText;
+                container.appendChild(msg);
+                return;
+            }
+
+            items.forEach(item => {
+                const cell = document.createElement('div');
+                cell.className = 'gallery-item';
+
+                if (type === 'image') {
+                    const img = document.createElement('img');
+                    img.src = item.src;
+                    img.alt = item.label || 'Discord image';
+                    img.loading = 'lazy';
+                    img.addEventListener('click', () => openLightbox(item.src, item.label));
+
+                    cell.appendChild(img);
+                } else {
+                    const video = document.createElement('video');
+                    video.className = 'video-player';
+                    video.controls = true;
+                    video.preload = 'metadata';
+                    const source = document.createElement('source');
+                    source.src = item.src;
+                    source.type = guessMimeType(item.src);
+                    video.appendChild(source);
+
+                    const caption = document.createElement('p');
+                    caption.className = 'media-caption';
+                    caption.textContent = item.label;
+
+                    const fallback = document.createElement('a');
+                    fallback.href = item.src;
+                    fallback.target = '_blank';
+                    fallback.rel = 'noopener noreferrer';
+                    fallback.textContent = 'Open video';
+
+                    cell.appendChild(caption);
+                    cell.appendChild(video);
+                    cell.appendChild(fallback);
+                }
+
+                container.appendChild(cell);
+            });
+        }
+
+        function uniqueList(items = []) {
+            return Array.from(new Set(items.map(item => item?.trim()).filter(Boolean)));
+        }
+
+        function isPdf(link) {
+            return /\.pdf(\?|$)/i.test(link);
+        }
+
+        function extractYoutubeId(link) {
+            try {
+                const url = new URL(link);
+                const host = url.hostname.replace(/^www\./, '');
+
+                if (host === 'youtu.be') {
+                    return url.pathname.replace('/', '');
+                }
+
+                if (host.endsWith('youtube.com')) {
+                    if (url.pathname === '/watch') {
+                        return url.searchParams.get('v');
+                    }
+                    if (url.pathname.startsWith('/live/')) {
+                        return url.pathname.split('/')[2];
+                    }
+                    if (url.pathname.startsWith('/shorts/')) {
+                        return url.pathname.split('/')[2];
+                    }
+                }
+            } catch (error) {
+                return null;
+            }
+            return null;
+        }
+
+        function buildDocumentLabel(link) {
+            const name = extractLastSegment(link);
+            return name || 'PDF Document';
+        }
+
+        function buildYoutubeLabel(link, fallbackId) {
+            const name = extractLastSegment(link);
+            return name || `YouTube Video (${fallbackId})`;
+        }
+
+        function buildGenericLabel(link) {
+            try {
+                const url = new URL(link);
+                let path = url.pathname;
+                if (path.length > 50) {
+                    path = `${path.slice(0, 47)}...`;
+                }
+                return `${url.hostname}${path === '/' ? '' : path}`;
+            } catch (error) {
+                return link;
+            }
+        }
+
+        function buildImageLabel(link) {
+            const segment = extractLastSegment(link);
+            return segment || getHostname(link) || 'Image';
+        }
+
+        function buildMediaLabel(link) {
+            const host = getHostname(link);
+            const segment = extractLastSegment(link);
+            const isDiscordCdn = host?.includes('cdn.discordapp.com');
+            if (segment && (!host || isDiscordCdn)) return segment;
+            if (segment && host) return `${host} • ${segment}`;
+            return segment || host || 'Video';
+        }
+
+        function getHostname(link) {
+            try {
+                const url = new URL(link);
+                return url.hostname;
+            } catch (error) {
+                return '';
+            }
+        }
+
+        function extractLastSegment(link) {
+            try {
+                const url = new URL(link);
+                const segments = url.pathname.split('/').filter(Boolean);
+                if (!segments.length) {
+                    return url.hostname;
+                }
+                const lastSegment = decodeURIComponent(segments.pop());
+                return lastSegment.replace(/\.[a-z0-9]+$/i, '').replace(/[-_]+/g, ' ').trim();
+            } catch (error) {
+                return link;
+            }
+        }
+
+        function guessMimeType(src) {
+            const ext = src.split('.').pop()?.split('?')[0]?.toLowerCase();
+            if (ext === 'webm') return 'video/webm';
+            return 'video/mp4';
+        }
+
+        function formatDisplayUrl(link) {
+            try {
+                const url = new URL(link);
+                const path = url.pathname === '/' ? '' : url.pathname;
+                const search = url.search || '';
+                return `${url.hostname}${path}${search}`;
+            } catch (error) {
+                return link;
+            }
+        }
+
+        function createPdfPlaceholder(label = 'PDF Document') {
+            const canvas = document.createElement('canvas');
+            canvas.width = 400;
+            canvas.height = 520;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#eef2ff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#dbe4ff';
+            ctx.fillRect(0, 0, canvas.width, 140);
+            ctx.fillStyle = '#1d4ed8';
+            ctx.font = 'bold 56px "Segoe UI", Arial';
+            ctx.fillText('PDF', 140, 90);
+            ctx.fillStyle = '#1f2937';
+            ctx.font = '24px "Segoe UI", Arial';
+            wrapText(ctx, label, 30, 200, 340, 30);
+            return canvas.toDataURL('image/png');
+        }
+
+        async function loadPdfThumbnail(url, imgElement) {
+            if (!window.pdfjsLib || !imgElement) return;
+            const preview = await generatePdfThumbnail(url);
+            if (preview) {
+                imgElement.src = preview;
+            }
+        }
+
+        async function generatePdfThumbnail(url) {
+            if (!window.pdfjsLib) return null;
+            try {
+                const loadingTask = pdfjsLib.getDocument({ url, withCredentials: false });
+                const pdf = await loadingTask.promise;
+                const page = await pdf.getPage(1);
+                const viewport = page.getViewport({ scale: 0.5 });
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                canvas.width = viewport.width;
+                canvas.height = viewport.height;
+                await page.render({ canvasContext: context, viewport }).promise;
+                const dataUrl = canvas.toDataURL('image/png');
+                if (typeof pdf.cleanup === 'function') {
+                    pdf.cleanup();
+                }
+                if (typeof pdf.destroy === 'function') {
+                    pdf.destroy();
+                }
+                return dataUrl;
+            } catch (error) {
+                console.warn('Unable to generate PDF preview for', url, error);
+                return null;
+            }
+        }
+
+        function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
+            const words = text.split(/\s+/);
+            let line = '';
+            words.forEach(word => {
+                const testLine = `${line}${word} `;
+                const { width } = ctx.measureText(testLine);
+                if (width > maxWidth && line) {
+                    ctx.fillText(line.trim(), x, y);
+                    line = `${word} `;
+                    y += lineHeight;
+                } else {
+                    line = testLine;
+                }
+            });
+            if (line.trim()) {
+                ctx.fillText(line.trim(), x, y);
+            }
+        }
+
+        function setupLightbox() {
+            const container = document.getElementById('image-lightbox');
+            if (!container) return;
+            lightboxState.container = container;
+            lightboxState.image = document.getElementById('lightbox-photo');
+            lightboxState.caption = document.getElementById('lightbox-caption');
+
+            container.querySelectorAll('[data-lightbox-close]').forEach(element => {
+                element.addEventListener('click', closeLightbox);
+            });
+
+            container.addEventListener('click', event => {
+                if (event.target === container || event.target.classList.contains('lightbox-overlay')) {
+                    closeLightbox();
+                }
+            });
+
+            document.addEventListener('keydown', event => {
+                if (event.key === 'Escape') {
+                    closeLightbox();
+                }
+            });
+        }
+
+        function openLightbox(src, caption) {
+            if (!lightboxState.container) {
+                window.open(src, '_blank', 'noopener');
+                return;
+            }
+            lightboxState.image.src = src;
+            lightboxState.image.alt = caption || 'Image preview';
+            lightboxState.caption.textContent = caption || '';
+            lightboxState.container.classList.remove('hidden');
+            requestAnimationFrame(() => lightboxState.container.classList.add('visible'));
+        }
+
+        function closeLightbox() {
+            if (!lightboxState.container || lightboxState.container.classList.contains('hidden')) return;
+            lightboxState.container.classList.remove('visible');
+            setTimeout(() => {
+                lightboxState.container.classList.add('hidden');
+                lightboxState.image.src = '';
+                lightboxState.caption.textContent = '';
+            }, 200);
+        }
+
+        function scheduleSupportModal() {
+            const modal = document.getElementById('support-modal');
+            if (!modal) return;
+            const closeBtn = modal.querySelector('.support-close');
+            const hideModal = () => {
+                modal.classList.remove('visible');
+                modal.setAttribute('aria-hidden', 'true');
+            };
+            closeBtn?.addEventListener('click', hideModal);
+            modal.addEventListener('click', event => {
+                if (event.target === modal) {
+                    hideModal();
+                }
+            });
+            supportTimer = setTimeout(() => {
+                modal.classList.add('visible');
+                modal.setAttribute('aria-hidden', 'false');
+            }, 20000);
+        }
+
+        function showTab(event, tabId) {
+            document.querySelectorAll('.content').forEach(section => section.classList.remove('active'));
+            const activeSection = document.getElementById(tabId);
+            if (activeSection) {
+                activeSection.classList.add('active');
+            }
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+        }
+
+        async function fetchYoutubeTitle(video) {
+            const cacheKey = video.id;
+            if (youtubeTitleCache.has(cacheKey)) {
+                return youtubeTitleCache.get(cacheKey);
+            }
+
+            const targetUrl = video.url && video.url.includes('youtube')
+                ? video.url
+                : `https://www.youtube.com/watch?v=${video.id}`;
+            const endpoint = `https://noembed.com/embed?url=${encodeURIComponent(targetUrl)}`;
+
+            try {
+                const response = await fetch(endpoint);
+                if (!response.ok) throw new Error('NoEmbed failed');
+                const data = await response.json();
+                const title = data.title || video.label || `YouTube Video (${video.id})`;
+                youtubeTitleCache.set(cacheKey, title);
+                return title;
+            } catch (error) {
+                const fallback = video.label || `YouTube Video (${video.id})`;
+                youtubeTitleCache.set(cacheKey, fallback);
+                return fallback;
+            }
+        }
+    </script>
+</body>
+</html>
+
+
+
+
+
+
