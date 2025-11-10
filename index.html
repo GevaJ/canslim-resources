@@ -11,6 +11,8 @@
         .tab { padding: 12px 18px; color: #cbd5ff; cursor: pointer; user-select: none; transition: background 0.2s; }
         .tab:not(.active):hover { background: rgba(255, 255, 255, 0.08); }
         .tab.active { background: linear-gradient(135deg, #2563eb, #7c3aed); color: #fff; }
+        .discord-link { margin-left: auto; text-decoration: none; display: inline-flex; align-items: center; gap: 10px; font-weight: 600; }
+        .discord-link svg { width: 28px; height: 28px; fill: currentColor; }
         .content { display: none; padding: 28px; }
         .content.active { display: block; background: rgba(10, 16, 30, 0.82); min-height: calc(100vh - 60px); border-top: 1px solid rgba(255,255,255,0.05); box-shadow: 0 20px 45px rgba(5,8,18,0.55); border-radius: 0 0 18px 18px; backdrop-filter: blur(8px); }
         iframe { width: 100%; max-width: 560px; height: auto; aspect-ratio: 16 / 9; margin: 10px 0; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); background: #000; }
@@ -57,9 +59,18 @@
         .support-card p { color: #cad5f7; }
         .support-close { position: absolute; top: 12px; right: 12px; border: none; background: transparent; color: #fff; font-size: 1.3rem; cursor: pointer; }
         .support-cta { margin-top: 16px; display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; background: linear-gradient(135deg,#fbbf24,#f97316); color: #150f02; font-weight: 700; border-radius: 999px; text-decoration: none; box-shadow: 0 10px 20px rgba(249,115,22,0.35); }
+        .page-loader { position: fixed; inset: 0; background: radial-gradient(circle at top, rgba(8,12,25,0.95), rgba(2,5,14,0.96)); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; z-index: 400; transition: opacity 0.3s ease; }
+        .page-loader.hidden { opacity: 0; pointer-events: none; }
+        .page-loader .spinner { width: 58px; height: 58px; border-radius: 50%; border: 5px solid rgba(255,255,255,0.2); border-top-color: #60a5ff; animation: spin 0.9s linear infinite; }
+        .page-loader p { margin: 0; color: #dbeafe; letter-spacing: 0.04em; text-transform: uppercase; font-size: 0.85rem; }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
+    <div id="page-loader" class="page-loader">
+        <div class="spinner"></div>
+        <p>Loading resources for better experience…</p>
+    </div>
     <div class="tabs">
         <div class="tab active" onclick="showTab(event, 'home')">Home</div>
         <div class="tab" onclick="showTab(event, 'pdfs')">PDFs</div>
@@ -67,6 +78,9 @@
         <div class="tab" onclick="showTab(event, 'images')">Images</div>
         <div class="tab" onclick="showTab(event, 'videos')">Videos</div>
         <div class="tab" onclick="showTab(event, 'books')">Books✨</div>
+        <a class="tab discord-link" href="https://discord.gg/xUz3nXZ3p5" target="_blank" rel="noopener noreferrer">
+            <span>Discord</span>
+        </a>
     </div>
 
     <div id="home" class="content active">
@@ -127,6 +141,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.min.js" integrity="sha512-O5bY5p+qZ+nhewc7ovQoPGwTpghSJOnA7xz/ES6sDIo8He3G6gZj/O9oYF6W1hLECPaKhLPgH8JbImTeTTKQ0g==" crossorigin="anonymous"></script>
     <script>
         const scrapedData = { links: [], images: [], videos: [] };
+        const loaderElement = document.getElementById('page-loader');
 
         scrapedData.links.push(
             'https://youtu.be/9ZJK8175drM',
@@ -506,10 +521,14 @@
         document.addEventListener('DOMContentLoaded', () => {
             setupLightbox();
             scheduleSupportModal();
-            populateDashboard(window.scrapedData || scrapedData);
+            showLoader();
+            const dataLoad = Promise.resolve(populateDashboard(window.scrapedData || scrapedData));
+            const minimumDelay = new Promise(resolve => setTimeout(resolve, 10000));
+            Promise.allSettled([dataLoad, minimumDelay])
+                .finally(() => hideLoader());
         });
 
-        function populateDashboard(data) {
+        async function populateDashboard(data) {
             const safeData = data || { links: [], images: [], videos: [] };
             const uniqueImages = uniqueList(safeData.images);
             const uniqueVideos = uniqueList(safeData.videos);
@@ -519,7 +538,7 @@
 
             renderPdfGallery('pdf-list', pdfLinks, 'No PDFs available yet.');
             renderLinkList('other-links', otherLinks, 'No other links available yet.');
-            renderYoutubeVideos('youtube-videos', youtubeVideos, 'No YouTube videos found.');
+            await renderYoutubeVideos('youtube-videos', youtubeVideos, 'No YouTube videos found.');
             renderGallery('images-gallery', imageItems, 'image', 'No images to display.');
             renderGallery('videos-gallery', videoItems, 'video', 'No videos to display.');
         }
@@ -566,6 +585,7 @@
                 return;
             }
 
+            const fragment = document.createDocumentFragment();
             items.forEach(item => {
                 const li = document.createElement('li');
                 const titleLink = document.createElement('a');
@@ -581,8 +601,9 @@
 
                 li.appendChild(titleLink);
                 li.appendChild(urlCopy);
-                container.appendChild(li);
+                fragment.appendChild(li);
             });
+            container.appendChild(fragment);
         }
 
         function renderPdfGallery(containerId, pdfs, emptyText) {
@@ -598,6 +619,7 @@
                 return;
             }
 
+            const fragment = document.createDocumentFragment();
             pdfs.forEach(pdf => {
                 const card = document.createElement('div');
                 card.className = 'pdf-card';
@@ -621,9 +643,10 @@
                     }
                 });
 
-                container.appendChild(card);
+                fragment.appendChild(card);
                 loadPdfThumbnail(pdf.url, thumb);
             });
+            container.appendChild(fragment);
         }
 
         function renderYoutubeVideos(containerId, videos, emptyText) {
@@ -639,6 +662,8 @@
                 return;
             }
 
+            const fragment = document.createDocumentFragment();
+            const pendingTitles = [];
             videos.forEach(video => {
                 const wrapper = document.createElement('div');
                 wrapper.className = 'media-card youtube-card';
@@ -654,16 +679,19 @@
                 iframe.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
                 iframe.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share');
 
-                fetchYoutubeTitle(video).then(title => {
+                const pending = fetchYoutubeTitle(video).then(title => {
                     heading.textContent = title;
                 }).catch(() => {
                     heading.textContent = video.label || `YouTube Video (${video.id})`;
                 });
+                pendingTitles.push(pending);
 
                 wrapper.appendChild(heading);
                 wrapper.appendChild(iframe);
-                container.appendChild(wrapper);
+                fragment.appendChild(wrapper);
             });
+            container.appendChild(fragment);
+            return Promise.allSettled(pendingTitles);
         }
 
         function renderGallery(containerId, items, type, emptyText) {
@@ -679,6 +707,7 @@
                 return;
             }
 
+            const fragment = document.createDocumentFragment();
             items.forEach(item => {
                 const cell = document.createElement('div');
                 cell.className = 'gallery-item';
@@ -716,8 +745,9 @@
                     cell.appendChild(fallback);
                 }
 
-                container.appendChild(cell);
+                fragment.appendChild(cell);
             });
+            container.appendChild(fragment);
         }
 
         function uniqueList(items = []) {
@@ -965,7 +995,19 @@
             supportTimer = setTimeout(() => {
                 modal.classList.add('visible');
                 modal.setAttribute('aria-hidden', 'false');
-            }, 20000);
+            }, 30000);
+        }
+
+        function showLoader() {
+            if (loaderElement) {
+                loaderElement.classList.remove('hidden');
+            }
+        }
+
+        function hideLoader() {
+            if (loaderElement) {
+                loaderElement.classList.add('hidden');
+            }
         }
 
         function showTab(event, tabId) {
@@ -1005,9 +1047,3 @@
     </script>
 </body>
 </html>
-
-
-
-
-
-
