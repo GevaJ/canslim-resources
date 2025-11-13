@@ -6,14 +6,15 @@
     <title>CANSLIM Resources</title>
     <style>
         html, body { height: 100%; }
-        body { font-family: Arial, sans-serif; margin: 0; background: radial-gradient(circle at top, #1f2b46, #0d1324 65%); color: #e6ecff; }
-        .tabs { display: flex; background: rgba(7, 12, 24, 0.92); position: sticky; top: 0; z-index: 10; backdrop-filter: blur(6px); }
-        .tab { padding: 12px 18px; color: #cbd5ff; cursor: pointer; user-select: none; transition: background 0.2s; }
+        *, *::before, *::after { box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; margin: 0; background: radial-gradient(circle at top, #1f2b46, #0d1324 65%); color: #e6ecff; line-height: 1.6; -webkit-text-size-adjust: 100%; }
+        .tabs { display: flex; flex-wrap: wrap; gap: 8px; padding: 10px 18px; background: rgba(7, 12, 24, 0.92); position: sticky; top: 0; z-index: 10; backdrop-filter: blur(6px); border-bottom: 1px solid rgba(255,255,255,0.07); overflow-x: auto; }
+        .tab { padding: 12px 18px; color: #cbd5ff; cursor: pointer; user-select: none; transition: background 0.2s; border-radius: 999px; text-align: center; flex: 0 0 auto; }
         .tab:not(.active):hover { background: rgba(255, 255, 255, 0.08); }
         .tab.active { background: linear-gradient(135deg, #2563eb, #7c3aed); color: #fff; }
         .discord-link { margin-left: auto; text-decoration: none; display: inline-flex; align-items: center; gap: 10px; font-weight: 600; }
         .discord-link svg { width: 28px; height: 28px; fill: currentColor; }
-        .content { display: none; padding: 28px; }
+        .content { display: none; padding: clamp(18px, 4vw, 32px); }
         .content.active { display: block; background: rgba(10, 16, 30, 0.82); min-height: calc(100vh - 60px); border-top: 1px solid rgba(255,255,255,0.05); box-shadow: 0 20px 45px rgba(5,8,18,0.55); border-radius: 0 0 18px 18px; backdrop-filter: blur(8px); }
         iframe { width: 100%; max-width: 560px; height: auto; aspect-ratio: 16 / 9; margin: 10px 0; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); background: #000; }
         ul { list-style: none; padding: 0; margin: 0; }
@@ -28,7 +29,7 @@
         .media-card { margin-bottom: 24px; padding: 16px; border: 1px solid rgba(255,255,255,0.04); border-radius: 12px; background: rgba(17,24,39,0.8); box-shadow: 0 12px 30px rgba(0,0,0,0.35); }
         .media-card h3 { margin: 0 0 8px 0; font-size: 1rem; color: #e3e8ff; }
         .empty-state { color: #9ba6c7; font-style: italic; margin: 0; }
-        .youtube-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 24px; }
+        .youtube-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 24px; }
         .youtube-card { border: 1px solid rgba(255,255,255,0.07); border-radius: 14px; padding: 18px; background: linear-gradient(160deg, rgba(7,11,23,0.95), rgba(20,27,46,0.9)); box-shadow: 0 20px 35px rgba(0,0,0,0.45); display: flex; flex-direction: column; align-items: center; gap: 12px; }
         .youtube-card h3 { text-align: center; }
         .link-list { list-style: decimal; padding-left: 24px; margin-top: 12px; }
@@ -49,7 +50,7 @@
         .lightbox-inner { position: relative; max-width: 90vw; max-height: 90vh; background: #fff; border-radius: 10px; padding: 16px; display: flex; flex-direction: column; align-items: center; gap: 10px; }
         .lightbox-inner img { max-width: 85vw; max-height: 80vh; object-fit: contain; border-radius: 6px; cursor: zoom-out; }
         .lightbox-close { position: absolute; top: 6px; right: 10px; border: none; background: transparent; font-size: 1.5rem; cursor: pointer; color: #333; }
-        .books-hero { margin-top: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 18px; align-items: start; }
+        .books-hero { margin-top: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; align-items: start; }
         .books-hero img { width: 100%; border-radius: 16px; border: 2px solid #0f172a; box-shadow: 0 15px 35px rgba(15,23,42,0.45); display: block; }
         .books-link { font-weight: 600; color: #d97706; }
         .support-modal { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(4, 6, 15, 0.85); opacity: 0; pointer-events: none; transition: opacity 0.3s ease; z-index: 200; padding: 20px; }
@@ -64,6 +65,30 @@
         .page-loader .spinner { width: 58px; height: 58px; border-radius: 50%; border: 5px solid rgba(255,255,255,0.2); border-top-color: #60a5ff; animation: spin 0.9s linear infinite; }
         .page-loader p { margin: 0; color: #dbeafe; letter-spacing: 0.04em; text-transform: uppercase; font-size: 0.85rem; }
         @keyframes spin { to { transform: rotate(360deg); } }
+        @media (max-width: 1024px) {
+            .tabs { justify-content: flex-start; }
+            .discord-link { margin-left: 0; order: 99; }
+        }
+        @media (max-width: 768px) {
+            body { font-size: 15px; }
+            .tab { flex: 1 1 calc(50% - 8px); }
+            .tabs { gap: 10px 8px; }
+            .content { padding: 18px 14px; }
+            .content.active { min-height: unset; border-radius: 0; box-shadow: none; }
+            .youtube-grid { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+            .gallery, .pdf-grid { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+            .books-hero { grid-template-columns: 1fr; }
+            .support-card { padding: 22px 18px; }
+            .support-cta { width: 100%; justify-content: center; }
+        }
+        @media (max-width: 480px) {
+            .tab { flex-basis: 100%; }
+            .tabs { gap: 6px; padding: 10px 12px; }
+            .pdf-thumb { height: 160px; }
+            .youtube-card, .media-card { padding: 14px; }
+            .lightbox-inner { padding: 10px; max-width: 100vw; }
+            .support-card { border-radius: 14px; }
+        }
     </style>
 </head>
 <!-- Google tag (gtag.js) -->
