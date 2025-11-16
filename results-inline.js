@@ -1,6 +1,12 @@
 window.inlineScrapedResults = {
   "resource": {
     "links": [
+      "https://shop.investors.com/images/promotional/shop/assets/pdf/TopStocks-2019.pdf",
+      "https://rainkinginsights.com/wp-content/uploads/2024/04/Livermore-Vol-3-1925-1940.pdf",
+      "https://www.scribd.com/document/612306030/Characteristics-of-Winning-Traders-John-Pocorobba-10-14-19",
+      "https://www.youtube.com/live/TN6V5eOJnVI?si=x0GxS05NSZwkdMCz",
+      "https://www.investors.com/how-to-invest/investors-corner/top-growth-stock-golden-sell-rule-when-take-losses-fast/",
+      "https://marketsurge.investors.com/resources/videoTutorials",
       "https://www.investors.com/ibd-videos/videos/how-to-uncover-leading-stocks-within-top-industries",
       "https://youtu.be/33r_K1znvaM?si=Q3dA8WrjgSrYcDM2",
       "https://archive.org/details/TheRichardD.WyckoffMethodOfTradingInStocks",
