@@ -857,7 +857,7 @@
             pdfjsLib.GlobalWorkerOptions.workerSrc = PDF_WORKER_SRC;
         }
 
-        const lightboxState = { container: null, image: null, caption: null };
+        const lightboxState = { container: null, image: null, caption: null, items: [], index: -1 };
         let supportTimer = null;
         const youtubeTitleCache = new Map();
 
@@ -1132,7 +1132,7 @@
             }
 
             const fragment = document.createDocumentFragment();
-            items.forEach(item => {
+            items.forEach((item, index) => {
                 const cell = document.createElement('div');
                 cell.className = 'gallery-item';
 
@@ -1141,7 +1141,7 @@
                     img.src = item.src;
                     img.alt = item.label || 'Discord image';
                     img.loading = 'lazy';
-                    img.addEventListener('click', () => openLightbox(item.src, item.label));
+                    img.addEventListener('click', () => openLightbox(item.src, item.label, index, items));
 
                     cell.appendChild(img);
                 } else {
@@ -1376,18 +1376,34 @@
             document.addEventListener('keydown', event => {
                 if (event.key === 'Escape') {
                     closeLightbox();
+                    return;
+                }
+                if (event.key === 'ArrowRight') {
+                    navigateLightbox(1);
+                    return;
+                }
+                if (event.key === 'ArrowLeft') {
+                    navigateLightbox(-1);
                 }
             });
         }
 
-        function openLightbox(src, caption) {
+        function openLightbox(src, caption, index = null, items = null) {
             if (!lightboxState.container) {
                 window.open(src, '_blank', 'noopener');
                 return;
             }
-            lightboxState.image.src = src;
-            lightboxState.image.alt = caption || 'Image preview';
-            lightboxState.caption.textContent = caption || '';
+            if (Array.isArray(items) && items.length) {
+                lightboxState.items = items.map(entry => ({ src: entry.src, label: entry.label }));
+            }
+            if (typeof index === 'number') {
+                lightboxState.index = index;
+            } else if (!lightboxState.items.length) {
+                lightboxState.index = -1;
+            } else if (lightboxState.index === -1) {
+                lightboxState.index = Math.max(0, lightboxState.items.findIndex(item => item.src === src));
+            }
+            setLightboxContent(src, caption);
             lightboxState.container.classList.remove('hidden');
             requestAnimationFrame(() => lightboxState.container.classList.add('visible'));
         }
@@ -1399,7 +1415,38 @@
                 lightboxState.container.classList.add('hidden');
                 lightboxState.image.src = '';
                 lightboxState.caption.textContent = '';
+                lightboxState.index = -1;
             }, 200);
+        }
+
+        function navigateLightbox(direction) {
+            if (!lightboxState.container || lightboxState.container.classList.contains('hidden')) return;
+            if (!lightboxState.items.length) return;
+            const total = lightboxState.items.length;
+            if (total === 0) return;
+            const currentIndex = typeof lightboxState.index === 'number' && lightboxState.index >= 0
+                ? lightboxState.index
+                : 0;
+            let nextIndex = currentIndex + direction;
+            if (nextIndex < 0) {
+                nextIndex = total - 1;
+            } else if (nextIndex >= total) {
+                nextIndex = 0;
+            }
+            lightboxState.index = nextIndex;
+            const nextItem = lightboxState.items[nextIndex];
+            if (nextItem) {
+                setLightboxContent(nextItem.src, nextItem.label);
+            }
+        }
+
+        function setLightboxContent(src, caption) {
+            if (!lightboxState.image) return;
+            lightboxState.image.src = src;
+            lightboxState.image.alt = caption || 'Image preview';
+            if (lightboxState.caption) {
+                lightboxState.caption.textContent = caption || '';
+            }
         }
 
         function scheduleSupportModal() {
