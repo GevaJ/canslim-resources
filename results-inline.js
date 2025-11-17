@@ -1,6 +1,7 @@
 window.inlineScrapedResults = {
   "resource": {
     "links": [
+      "https://rainkinginsights.com/freecontent/",
       "https://shop.investors.com/images/promotional/shop/assets/pdf/TopStocks-2019.pdf",
       "https://rainkinginsights.com/wp-content/uploads/2024/04/Livermore-Vol-3-1925-1940.pdf",
       "https://www.scribd.com/document/612306030/Characteristics-of-Winning-Traders-John-Pocorobba-10-14-19",
