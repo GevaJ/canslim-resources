@@ -1,596 +1,709 @@
-﻿<!DOCTYPE html>
+﻿﻿<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CANSLIM Resources</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg: #0f1115;
-            --surface: #181b21;
-            --surface-hover: #22262e;
-            --border: #2f3542;
-            --primary: #ffe066;
-            --primary-hover: #ffd54f;
-            --accent: #00ff98;
-            --text: #ffffff;
-            --text-secondary: #a0aec0;
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --bg: #000000;
+            --panel: rgba(0, 0, 0, 0.85);
+            --text: #fffbd6;
+            --subtext: #c5ffba;
+            --accent: #ffe066;
+            --accent-2: #00ff98;
+            --accent-3: #ffd54f;
+            --border: rgba(255, 224, 102, 0.85);
+            --shadow: rgba(0, 255, 138, 0.4);
+            --grid-line: rgba(0, 255, 118, 0.18);
         }
-
         *, *::before, *::after { box-sizing: border-box; }
-
         body {
             margin: 0;
             min-height: 100vh;
-            font-family: 'Inter', sans-serif;
+            font-family: 'Verdana', 'Geneva', 'Tahoma', sans-serif;
             background-color: var(--bg);
             color: var(--text);
-            line-height: 1.6;
-        }
-
-        a {
-            color: var(--accent);
-            text-decoration: none;
-            transition: color 0.2s;
-        }
-
-        a:hover {
-            color: var(--primary);
-        }
-
-        /* Layout */
-        .app-container {
-            display: grid;
-            grid-template-columns: 250px 1fr;
-            min-height: 100vh;
-        }
-
-        /* Sidebar */
-        .sidebar {
-            background: var(--surface);
-            border-right: 1px solid var(--border);
-            padding: 2rem 1.5rem;
-            position: sticky;
-            top: 0;
-            height: 100vh;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .brand {
-            margin-bottom: 2.5rem;
-        }
-
-        .brand h1 {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: var(--primary);
-            margin: 0;
-            letter-spacing: -0.02em;
-        }
-
-        .brand span {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-            display: block;
-            margin-top: 0.25rem;
-        }
-
-        .nav-menu {
-            display: flex;
-            flex-direction: column;
-            gap: 0.5rem;
-            flex: 1;
-        }
-
-        .nav-item {
-            padding: 0.75rem 1rem;
-            border-radius: 0.5rem;
-            color: var(--text-secondary);
-            cursor: pointer;
-            transition: all 0.2s;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .nav-item:hover {
-            background: var(--surface-hover);
-            color: var(--text);
-        }
-
-        .nav-item.active {
-            background: var(--primary);
-            color: #000;
-        }
-
-        .nav-item.discord {
-            margin-top: auto;
-            background: #5865F2;
-            color: white;
-        }
-        
-        .nav-item.discord:hover {
-            background: #4752c4;
-        }
-
-        /* Main Content */
-        .main-content {
-            padding: 2rem 3rem;
-            max-width: 1600px;
-            width: 100%;
-        }
-
-        .header-stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 3rem;
-        }
-
-        .stat-card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 0.75rem;
-            padding: 1.25rem;
-            box-shadow: var(--shadow);
-        }
-
-        .stat-label {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-            margin-bottom: 0.5rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .stat-value {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: var(--text);
-        }
-
-        .section-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 1.5rem;
-            color: var(--text);
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .section-title::after {
-            content: '';
-            flex: 1;
-            height: 1px;
-            background: var(--border);
-        }
-
-        /* Content Grids */
-        .content-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 1.5rem;
-            display: none; /* Hidden by default */
-        }
-
-        .content-grid.active {
-            display: grid;
-        }
-        
-        .list-view {
-            display: none;
-            flex-direction: column;
-            gap: 1rem;
-        }
-        
-        .list-view.active {
-            display: flex;
-        }
-
-        /* Cards */
-        .card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 0.75rem;
-            overflow: hidden;
-            transition: transform 0.2s, box-shadow 0.2s;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            border-color: var(--primary);
-        }
-
-        .card-media {
-            aspect-ratio: 16/9;
-            background: #000;
+            line-height: 1.5;
             position: relative;
+            overflow-x: hidden;
         }
-
-        .card-media img, .card-media video, .card-media iframe {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border: none;
+        h1, h2, h3 {
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin: 0;
         }
-
-        .card-body {
-            padding: 1rem;
-            flex: 1;
-            display: flex;
-            flex-direction: column;
+        a {
+            color: var(--accent-2);
+            text-decoration: underline;
         }
-
-        .card-title {
-            font-weight: 600;
-            margin: 0 0 0.5rem;
-            font-size: 1rem;
-            line-height: 1.4;
-            color: var(--text);
+        a:hover {
+            color: var(--accent);
         }
-        
-        .card-meta {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-            margin-top: auto;
-        }
-
-        /* Link Items */
-        .link-item {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 0.5rem;
-            padding: 1rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .link-item:hover {
-            border-color: var(--primary);
-        }
-
-        .link-content {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .link-url {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-            margin-top: 0.25rem;
-        }
-
-        /* Loader */
-        .loader-overlay {
+        .bg-aurora,
+        .bg-grid {
             position: fixed;
             inset: 0;
-            background: var(--bg);
+            pointer-events: none;
+            z-index: 0;
+        }
+        .bg-grid {
+            background-image:
+                linear-gradient(var(--grid-line) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
+            background-size: 40px 40px;
+            opacity: 0.7;
+        }
+        .bg-aurora {
+            background: radial-gradient(circle at 20% 20%, rgba(0,255,153,0.25), transparent 45%),
+                        radial-gradient(circle at 80% 0%, rgba(255,255,0,0.17), transparent 55%);
+            animation: scan 18s linear infinite;
+        }
+        .retro-frame {
+            position: relative;
+            z-index: 1;
+            width: min(1100px, 96vw);
+            margin: 2rem auto 3rem;
+            border-collapse: collapse;
+            border: 4px double var(--border);
+            background: rgba(0,0,0,0.92);
+            box-shadow: 0 0 30px #001f10 inset, 0 0 35px rgba(0,255,118,0.3);
+        }
+        .retro-frame td {
+            border: 1px solid rgba(255,224,102,0.3);
+            padding: 1.25rem;
+        }
+        .retro-banner td {
+            border-color: rgba(255,224,102,0.6);
+            background: linear-gradient(90deg, rgba(0,0,0,0.85), rgba(8,35,15,0.9));
+        }
+        .retro-title {
+            font-size: clamp(1.3rem, 4vw, 1.9rem);
+            color: var(--accent);
+            text-shadow: 0 0 8px var(--accent), 0 0 20px rgba(255,255,0,0.8);
+        }
+        .retro-era {
+            display: block;
+            font-size: 0.85rem;
+            letter-spacing: 0.2em;
+            color: var(--accent-2);
+            margin-top: 0.3rem;
+        }
+        .retro-leadin {
+            margin: 0.8rem 0 0;
+            color: var(--subtext);
+            font-size: 0.95rem;
+        }
+        .retro-badges {
+            text-align: right;
+        }
+        .retro-badges img {
+            width: 140px;
+            height: auto;
+            margin-left: 0.5rem;
+            border: 2px solid var(--border);
+            box-shadow: 0 0 10px #000 inset, 0 0 12px var(--shadow);
+        }
+        .retro-dashboard td {
+            background: rgba(0,0,0,0.85);
+        }
+        .retro-stats {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(3,3,3,0.8);
+            border: 1px solid var(--border);
+            margin-bottom: 1rem;
+        }
+        .retro-stats th,
+        .retro-stats td {
+            border: 1px solid rgba(255,224,102,0.4);
+            padding: 0.6rem;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+        }
+        .retro-stats td {
+            font-family: 'Courier New', monospace;
+            font-size: 1rem;
+            color: #7bff9f;
+            text-shadow: 0 0 5px rgba(0,255,118,0.6);
+        }
+        .retro-note {
+            font-size: 0.95rem;
+            color: var(--accent);
+            text-shadow: 0 0 5px rgba(255, 224, 102, 0.6);
+            margin: 0.5rem 0 0.8rem;
+        }
+        .xp-meter {
+            width: 100%;
+            height: 18px;
+            border: 2px solid var(--accent);
+            background: repeating-linear-gradient(90deg, #071c07 0 12px, #0d2a0d 12px 24px);
+            box-shadow: 0 0 10px rgba(0,255,118,0.5);
+            margin-bottom: 0.4rem;
+        }
+        .xp-fill {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #00ff9d, #ffd54f);
+            box-shadow: 0 0 10px rgba(255,255,0,0.9);
+            transition: width 0.4s ease;
+        }
+        .xp-label {
+            margin: 0;
+            font-size: 0.85rem;
+            font-family: 'Courier New', monospace;
+            color: #f4ff9d;
+        }
+        .pulse-list {
+            list-style: none;
+            margin: 1rem 0 0;
+            padding: 0;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .pulse-list li {
+            padding: 0.35rem 0.8rem;
+            border: 1px solid var(--border);
+            background: rgba(0,0,0,0.75);
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            animation: blink 2.4s steps(2, jump-none) infinite;
+        }
+        .retro-nav td {
+            background: rgba(4,4,4,0.85);
+        }
+        .tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+            padding: 0.75rem;
+            border: 2px solid var(--border);
+            background: repeating-linear-gradient(135deg, rgba(0,0,0,0.9) 0 8px, rgba(6,25,8,0.9) 8px 16px);
+        }
+        .tab {
+            padding: 0.6rem 1.2rem;
+            border: 1px solid var(--border);
+            background: rgba(0,0,0,0.65);
+            color: var(--accent);
+            font-weight: 700;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0,0,0,0.8) inset;
+        }
+        .tab.active {
+            background: var(--accent);
+            color: #000;
+            box-shadow: 0 0 15px rgba(255,255,0,0.8);
+        }
+        .discord-link {
+            text-decoration: none;
+            color: #000;
+            background: repeating-linear-gradient(90deg, #ffe066 0 10px, #ffb347 10px 20px);
+        }
+        .content {
+            display: none;
+            margin: 1rem 0;
+            padding: 1.25rem;
+            background: rgba(0,0,0,0.8);
+            border: 2px solid var(--border);
+            box-shadow: 0 0 20px rgba(0,255,118,0.15) inset;
+        }
+        .content.active {
+            display: block;
+        }
+        .content h2 {
+            color: var(--accent);
+            margin-bottom: 0.75rem;
+        }
+        ul, ol {
+            margin: 0;
+            padding: 0;
+        }
+        .link-list {
+            list-style: decimal-leading-zero;
+            padding-left: 1.5rem;
+        }
+        .link-list li {
+            margin-bottom: 0.9rem;
+        }
+        .link-title {
+            display: block;
+            font-weight: 700;
+            color: var(--accent-2);
+        }
+        .link-url {
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            color: var(--subtext);
+        }
+        .empty-state {
+            padding: 1rem;
+            border: 1px dashed var(--accent);
+            background: rgba(10,10,10,0.6);
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--subtext);
+        }
+        .pdf-grid,
+        .youtube-grid,
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 1rem;
+        }
+        .pdf-card,
+        .media-card,
+        .gallery-item {
+            background: rgba(0,0,0,0.75);
+            border: 2px solid rgba(255,224,102,0.4);
+            box-shadow: 0 0 12px rgba(0,255,118,0.2);
+            padding: 0.9rem;
+        }
+        .pdf-card:focus,
+        .pdf-card:hover {
+            outline: 2px solid var(--accent);
+            cursor: pointer;
+        }
+        .pdf-thumb {
+            width: 100%;
+            height: 180px;
+            object-fit: cover;
+            border: 1px solid var(--border);
+            margin-bottom: 0.6rem;
+        }
+        .pdf-title {
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 0.95rem;
+        }
+        .media-card {
+            display: flex;
+            flex-direction: column;
+            gap: 0.6rem;
+        }
+        .media-card h3 {
+            font-size: 1rem;
+            color: var(--accent);
+        }
+        .media-card iframe {
+            width: 100%;
+            min-height: 200px;
+            border: 2px solid var(--border);
+        }
+        .media-caption {
+            font-size: 0.85rem;
+            color: var(--subtext);
+            text-transform: uppercase;
+        }
+        .video-player {
+            width: 100%;
+            border: 1px solid var(--border);
+            background: #000;
+        }
+        .gallery-item img,
+        .gallery-item video {
+            width: 100%;
+            border: 1px solid var(--border);
+        }
+        .gallery-item a {
+            color: var(--accent-2);
+            font-size: 0.8rem;
+        }
+        .books-hero {
+            text-align: center;
+            border: 2px solid var(--border);
+            padding: 1rem;
+            background: rgba(2,2,2,0.8);
+        }
+        .books-hero img {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+        .books-link {
+            font-weight: 700;
+        }
+        .support-modal {
+            position: fixed;
+            inset: 0;
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 50;
-            transition: opacity 0.3s;
+            backdrop-filter: blur(2px);
+            z-index: 20;
+            transition: opacity 0.3s ease;
         }
-
-        .loader-overlay.hidden {
+        .support-modal[aria-hidden="true"] {
             opacity: 0;
             pointer-events: none;
         }
-
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid var(--surface-hover);
-            border-top-color: var(--primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
+        .support-card {
+            position: relative;
+            background: rgba(0,0,0,0.9);
+            border: 3px solid var(--border);
+            padding: 1.5rem;
+            max-width: 360px;
+            text-align: center;
+            color: var(--text);
+            box-shadow: 0 0 25px rgba(0,0,0,0.8);
         }
-
-        /* Lightbox */
+        .support-close {
+            background: transparent;
+            border: none;
+            color: var(--accent);
+            font-size: 1.5rem;
+            cursor: pointer;
+            position: absolute;
+            top: 0.5rem;
+            right: 1rem;
+        }
+        .support-cta {
+            display: inline-block;
+            margin-top: 0.8rem;
+            padding: 0.5rem 1rem;
+            border: 2px solid var(--accent);
+            background: rgba(0,0,0,0.8);
+            color: var(--accent);
+            text-transform: uppercase;
+        }
         .lightbox {
             position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, 0.9);
-            z-index: 100;
             display: none;
             align-items: center;
             justify-content: center;
-            padding: 2rem;
+            z-index: 30;
         }
-
-        .lightbox.active {
+        .lightbox.hidden {
+            display: none;
+        }
+        .lightbox:not(.hidden) {
             display: flex;
         }
-
-        .lightbox img {
-            max-width: 100%;
-            max-height: 90vh;
-            border-radius: 0.5rem;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        .lightbox-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.85);
         }
-        
+        .lightbox-inner {
+            position: relative;
+            background: #000;
+            border: 2px solid var(--border);
+            padding: 1rem;
+            max-width: 90vw;
+            z-index: 1;
+        }
+        .lightbox-inner img {
+            max-width: 80vw;
+            max-height: 80vh;
+            display: block;
+        }
+        .lightbox-inner p {
+            margin: 0.7rem 0 0;
+            color: var(--subtext);
+        }
         .lightbox-close {
             position: absolute;
-            top: 1rem;
-            right: 1rem;
-            background: none;
+            top: 0.2rem;
+            right: 0.4rem;
+            background: transparent;
             border: none;
-            color: white;
+            color: var(--accent);
             font-size: 2rem;
             cursor: pointer;
         }
-
-        /* Support Banner */
-        .support-banner {
-            position: fixed;
-            bottom: 2rem;
-            right: 2rem;
-            background: var(--surface);
-            border: 1px solid var(--border);
-            padding: 1rem;
-            border-radius: 0.75rem;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-            max-width: 300px;
-            z-index: 40;
-            transform: translateY(150%);
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        .page-loader {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            padding: 0.6rem 1rem;
+            margin-bottom: 0.75rem;
+            border: 2px dashed var(--accent);
+            background: rgba(0,0,0,0.85);
+            color: var(--accent);
+            font-family: 'Courier New', monospace;
         }
-
-        .support-banner.visible {
-            transform: translateY(0);
+        .page-loader.hidden {
+            display: none;
         }
-
-        .support-banner h3 {
-            margin: 0 0 0.5rem;
-            font-size: 1rem;
-            color: var(--primary);
+        .spinner {
+            width: 22px;
+            height: 22px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
         }
-
-        .support-banner p {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-            margin: 0 0 1rem;
+        .page-loader p {
+            margin: 0;
+            font-size: 0.85rem;
         }
-
-        .btn {
-            display: inline-block;
-            padding: 0.5rem 1rem;
-            background: var(--primary);
-            color: #000;
-            border-radius: 0.375rem;
-            font-size: 0.875rem;
-            font-weight: 600;
-            text-decoration: none;
-            transition: background 0.2s;
+        @keyframes scan {
+            0% { transform: translateY(-10%); opacity: 0.4; }
+            50% { opacity: 0.9; }
+            100% { transform: translateY(10%); opacity: 0.4; }
         }
-
-        .btn:hover {
-            background: var(--primary-hover);
-            color: #000;
+        @keyframes blink {
+            0%, 49% { opacity: 1; }
+            50%, 100% { opacity: 0.6; }
         }
-        
-        .btn-close {
-            position: absolute;
-            top: 0.5rem;
-            right: 0.5rem;
-            background: none;
-            border: none;
-            color: var(--text-secondary);
-            cursor: pointer;
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
-
-        @keyframes spin { to { transform: rotate(360deg); } }
-
-        @media (max-width: 768px) {
-            .app-container {
-                grid-template-columns: 1fr;
-            }
-            .sidebar {
-                height: auto;
-                position: relative;
+        @media (max-width: 900px) {
+            .retro-frame td {
                 padding: 1rem;
-                border-right: none;
-                border-bottom: 1px solid var(--border);
             }
-            .nav-menu {
-                flex-direction: row;
-                overflow-x: auto;
-                padding-bottom: 0.5rem;
-            }
-            .nav-item {
-                white-space: nowrap;
-            }
-            .main-content {
-                padding: 1.5rem;
+            .retro-badges {
+                text-align: left;
+                margin-top: 1rem;
             }
         }
-    </style>
+        @media (max-width: 640px) {
+            .retro-frame {
+                width: 95vw;
+            }
+            .retro-frame tr,
+            .retro-frame td {
+                display: block;
+            }
+            .retro-badges img {
+                width: 120px;
+            }
+            .tabs {
+                flex-direction: column;
+            }
+            .pulse-list {
+                flex-direction: column;
+            }
+        }
+        @media (max-width: 520px) {
+            .retro-title {
+                font-size: 1.1rem;
+            }
+            .retro-era {
+                letter-spacing: 0.1em;
+            }
+        }
+
+</style>
 </head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-846VJ90DLC"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-846VJ90DLC');
+</script>
 <body>
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-846VJ90DLC"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-846VJ90DLC');
-    </script>
+    <div class="bg-aurora" aria-hidden="true"></div>
+    <div class="bg-grid" aria-hidden="true"></div>
 
-    <div id="loader" class="loader-overlay">
-        <div class="spinner"></div>
-    </div>
-
-    <div class="app-container">
-        <aside class="sidebar">
-            <div class="brand">
-                <h1>CANSLIM Terminal</h1>
-                <span>Resource Archive</span>
-            </div>
-            <nav class="nav-menu">
-                <div class="nav-item active" onclick="switchTab('home')">Home</div>
-                <div class="nav-item" onclick="switchTab('motivation')">Motivation</div>
-                <div class="nav-item" onclick="switchTab('pdfs')">PDFs</div>
-                <div class="nav-item" onclick="switchTab('youtube')">YouTube</div>
-                <div class="nav-item" onclick="switchTab('images')">Images</div>
-                <div class="nav-item" onclick="switchTab('videos')">Videos</div>
-                <div class="nav-item" onclick="switchTab('books')">Books</div>
-                <a href="https://discord.gg/xUz3nXZ3p5" target="_blank" class="nav-item discord">
-                    Join Discord
-                </a>
-            </nav>
-        </aside>
-
-        <main class="main-content">
-            <div class="header-stats">
-                <div class="stat-card">
-                    <div class="stat-label">Total Resources</div>
-                    <div class="stat-value" id="stat-total">0</div>
+    <table class="retro-frame" role="presentation">
+        <tr class="retro-banner">
+            <td>
+                <div class="retro-title">CANSLIM RESOURCE TERMINAL</div>
+                <span class="retro-era">Market Intel // 1999-2005</span>
+                <p class="retro-leadin">
+                    Plug into the frozen-in-time CANSLIM bulletin board. Track the drops, hoard the scans, and flex the neon numbers.
+                </p>
+            </td>
+            <td class="retro-badges">
+                <img src="badges/badge-hot.gif" alt="Animated HOT badge">
+                <img src="badges/badge-new.gif" alt="Animated NEW badge">
+            </td>
+        </tr>
+        <tr class="retro-dashboard">
+            <td colspan="2">
+                <table class="retro-stats" role="presentation" aria-label="CANSLIM stats table">
+                    <tr>
+                        <th scope="row">Vault Score</th>
+                        <td id="stat-total">0</td>
+                        <th scope="row">Focus Streak</th>
+                        <td><span id="streak-count">0d</span></td>
+                    </tr>
+                    <tr>
+                        <th scope="row">PDF Vault</th>
+                        <td id="stat-pdfs">0</td>
+                        <th scope="row">Video Training</th>
+                        <td id="stat-youtube">0</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Visual Cache</th>
+                        <td id="stat-visuals">0</td>
+                        <th scope="row">Hype Feed</th>
+                        <td id="stat-motivation">0</td>
+                    </tr>
+                </table>
+                <p class="retro-note" id="reward-note">Collect 5 drops to unlock Scout tier.</p>
+                <div class="xp-meter" aria-hidden="true">
+                    <div class="xp-fill" id="xp-progress-fill"></div>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-label">PDF Documents</div>
-                    <div class="stat-value" id="stat-pdfs">0</div>
+                <p class="xp-label" id="xp-progress-label">100 XP to next boost</p>
+                <ul class="pulse-list">
+                    <li id="pulse-links">0 drops logged</li>
+                    <li id="pulse-visuals">0 visuals curated</li>
+                    <li id="pulse-energy">0 XP surge</li>
+                </ul>
+            </td>
+        </tr>
+        <tr class="retro-nav">
+            <td colspan="2">
+                <div id="page-loader" class="page-loader">
+                    <div class="spinner"></div>
+                    <p>Loading resources for better experience.<br>Thanks for your patience!</p>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-label">Video Training</div>
-                    <div class="stat-value" id="stat-youtube">0</div>
+                <div class="tabs">
+                    <div class="tab active" data-tab="home" onclick="showTab(event, 'home')">Home</div>
+                    <div class="tab" data-tab="motivation" onclick="showTab(event, 'motivation')">Motivation</div>
+                    <div class="tab" data-tab="pdfs" onclick="showTab(event, 'pdfs')">PDFs</div>
+                    <div class="tab" data-tab="youtube" onclick="showTab(event, 'youtube')">YouTube</div>
+                    <div class="tab" data-tab="images" onclick="showTab(event, 'images')">Images</div>
+                    <div class="tab" data-tab="videos" onclick="showTab(event, 'videos')">Videos</div>
+                    <div class="tab" data-tab="books" onclick="showTab(event, 'books')">Books?</div>
+                    <a class="tab discord-link" href="https://discord.gg/xUz3nXZ3p5" target="_blank" rel="noopener noreferrer">
+                        <span>Discord</span>
+                    </a>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-label">Visuals</div>
-                    <div class="stat-value" id="stat-visuals">0</div>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <div id="home" class="content active">
+                    <h2>Other Links</h2>
+                    <ol id="other-links" class="link-list"></ol>
                 </div>
-            </div>
 
-            <div id="home" class="tab-content active">
-                <h2 class="section-title">Latest Resources</h2>
-                <div id="other-links" class="list-view active"></div>
-            </div>
+                <div id="motivation" class="content">
+                    <h2>Motivation</h2>
+                    <ol id="motivation-links" class="link-list"></ol>
+                </div>
 
-            <div id="motivation" class="tab-content" style="display: none;">
-                <h2 class="section-title">Daily Motivation</h2>
-                <div id="motivation-links" class="list-view"></div>
-            </div>
+                <div id="pdfs" class="content">
+                    <h2>PDFs</h2>
+                    <div id="pdf-list" class="pdf-grid"></div>
+                </div>
 
-            <div id="pdfs" class="tab-content" style="display: none;">
-                <h2 class="section-title">PDF Library</h2>
-                <div id="pdf-list" class="content-grid"></div>
-            </div>
+                <div id="youtube" class="content">
+                    <h2>YouTube Videos</h2>
+                    <div id="youtube-videos" class="youtube-grid"></div>
+                </div>
 
-            <div id="youtube" class="tab-content" style="display: none;">
-                <h2 class="section-title">YouTube Training</h2>
-                <div id="youtube-videos" class="content-grid"></div>
-            </div>
+                <div id="images" class="content">
+                    <h2>Images</h2>
+                    <h3>Use left and right arrows to scroll images</h3>
+                    <div id="images-gallery" class="gallery"></div>
+                </div>
 
-            <div id="images" class="tab-content" style="display: none;">
-                <h2 class="section-title">Chart Gallery</h2>
-                <div id="images-gallery" class="content-grid"></div>
-            </div>
+                <div id="videos" class="content">
+                    <h2>Discord Videos</h2>
+                    <div id="videos-gallery" class="gallery"></div>
+                </div>
 
-            <div id="videos" class="tab-content" style="display: none;">
-                <h2 class="section-title">Video Archive</h2>
-                <div id="videos-gallery" class="content-grid"></div>
-            </div>
-
-            <div id="books" class="tab-content" style="display: none;">
-                <h2 class="section-title">Book Library</h2>
-                <div class="card" style="max-width: 800px; margin: 0 auto; text-align: center; padding: 2rem;">
-                    <img src="./library.png" alt="Library Preview" style="max-width: 100%; border-radius: 0.5rem; margin-bottom: 1.5rem;">
-                    <h3>Unlock the Full Library</h3>
-                    <p style="color: var(--text-secondary); margin-bottom: 1.5rem;">
-                        Support the community to gain access to the full CANSLIM books library, scans, and curated notes.
+                <div id="books" class="content">
+                    <h2>Support the community to gain access to the full CANSLIM books library.</h2>
+                    <p>
+                        Pitch in to keep the resource growing and unlock the curated bookshelf by backing us on
+                        <a class="books-link" href="http://ko-fi.com/ibd_canslim_investor_network/tiers" target="_blank" rel="noopener noreferrer">Ko-fi</a>.
                     </p>
-                    <a href="http://ko-fi.com/ibd_canslim_investor_network/tiers" target="_blank" class="btn">Back us on Ko-fi</a>
+                    <div class="books-hero">
+                        <img src="./library.png" alt="CANSLIM book list preview">
+                    </div>
                 </div>
-            </div>
-        </main>
+            </td>
+        </tr>
+    </table>
+
+    <div id="support-modal" class="support-modal" aria-hidden="true">
+        <div class="support-card">
+            <button class="support-close" aria-label="Close support message">&times;</button>
+            <h3>Support the CANSLIM Community</h3>
+            <p>Help us maintain the research archive, book scans, and curated notes for fellow investors.</p>
+            <a class="support-cta" href="http://ko-fi.com/ibd_canslim_investor_network/tiers" target="_blank" rel="noopener noreferrer">Back us on Ko-fi</a>
+        </div>
     </div>
 
-    <div id="support-banner" class="support-banner">
-        <button class="btn-close" onclick="closeSupport()">&times;</button>
-        <h3>Support the Community</h3>
-        <p>Help us maintain the archive and unlock more resources.</p>
-        <a href="http://ko-fi.com/ibd_canslim_investor_network/tiers" target="_blank" class="btn">Support</a>
+    <div id="image-lightbox" class="lightbox hidden">
+        <div class="lightbox-overlay" data-lightbox-close></div>
+        <div class="lightbox-inner">
+            <button class="lightbox-close" aria-label="Close image preview" data-lightbox-close>&times;</button>
+            <img id="lightbox-photo" src="" alt="Enlarged preview">
+            <p id="lightbox-caption"></p>
+        </div>
     </div>
 
-    <div id="lightbox" class="lightbox" onclick="closeLightbox(event)">
-        <button class="lightbox-close">&times;</button>
-        <img id="lightbox-img" src="" alt="Preview">
-    </div>
-
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.min.js" integrity="sha512-O5bY5p+qZ+nhewc7ovQoPGwTpghSJOnA7xz/ES6sDIo8He3G6gZj/O9oYF6W1hLECPaKhLPgH8JbImTeTTKQ0g==" crossorigin="anonymous"></script>
     <script src="results-inline.js"></script>
     <script>
-        // State
-        let scrapedData = null;
-        
-        // Initialization
-        document.addEventListener('DOMContentLoaded', () => {
-            loadData();
-            setTimeout(() => {
-                document.getElementById('support-banner').classList.add('visible');
-            }, 5000);
+        const loaderElement = document.getElementById('page-loader');
+        const rewardNodeList = Array.from(document.querySelectorAll('.reward-track [data-threshold]')).sort((a, b) => {
+            return Number(a.dataset.threshold || 0) - Number(b.dataset.threshold || 0);
         });
+        const heroUi = {
+            total: document.getElementById('stat-total'),
+            pdfs: document.getElementById('stat-pdfs'),
+            youtube: document.getElementById('stat-youtube'),
+            visuals: document.getElementById('stat-visuals'),
+            motivation: document.getElementById('stat-motivation'),
+            streak: document.getElementById('streak-count'),
+            rewardNote: document.getElementById('reward-note'),
+            xpFill: document.getElementById('xp-progress-fill'),
+            xpLabel: document.getElementById('xp-progress-label'),
+            trackNodes: rewardNodeList.length ? rewardNodeList : null,
+            pulseLinks: document.getElementById('pulse-links'),
+            pulseVisuals: document.getElementById('pulse-visuals'),
+            pulseEnergy: document.getElementById('pulse-energy')
+        };
+        const numberFormatter = new Intl.NumberFormat('en-US');
+        const inlineResults = window.inlineScrapedResults || null;
+        const scrapedDataPromise = loadScrapedData();
 
-        // Navigation
-        function switchTab(tabId) {
-            // Update Nav
-            document.querySelectorAll('.nav-item').forEach(el => {
-                el.classList.remove('active');
-                if (el.textContent.toLowerCase().includes(tabId) && !el.classList.contains('discord')) {
-                    el.classList.add('active');
-                }
-            });
-
-            // Update Content
-            document.querySelectorAll('.tab-content').forEach(el => {
-                el.style.display = 'none';
-            });
-            
-            const target = document.getElementById(tabId);
-            if (target) {
-                target.style.display = 'block';
-                // Activate grids if needed
-                const grid = target.querySelector('.content-grid');
-                if (grid) grid.classList.add('active');
-                const list = target.querySelector('.list-view');
-                if (list) list.classList.add('active');
-            }
+        const PDF_WORKER_SRC = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.worker.min.js';
+        if (window.pdfjsLib && pdfjsLib.GlobalWorkerOptions) {
+            pdfjsLib.GlobalWorkerOptions.workerSrc = PDF_WORKER_SRC;
         }
 
-        // Data Loading
-        async function loadData() {
+        const lightboxState = { container: null, image: null, caption: null, items: [], index: -1 };
+        let supportTimer = null;
+        const youtubeTitleCache = new Map();
+
+        async function loadScrapedData() {
+            if (window.scrapedData && Array.isArray(window.scrapedData.links)) {
+                return window.scrapedData;
+            }
+
             try {
-                // Try fetching file first
                 const response = await fetch('results.txt', { cache: 'no-store' });
-                if (response.ok) {
-                    const payload = await response.json();
-                    scrapedData = normalizePayload(payload);
-                } else {
-                    throw new Error('File not found');
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch results.txt (${response.status})`);
                 }
-            } catch (e) {
-                console.warn('Using inline results fallback');
-                scrapedData = normalizePayload(window.inlineScrapedResults || {});
+                const payload = await response.json();
+                const normalized = normalizePayload(payload);
+                window.scrapedData = normalized;
+                return normalized;
+            } catch (error) {
+                if (inlineResults) {
+                    console.warn('Falling back to inline results bundle.', error);
+                    const normalized = normalizePayload(inlineResults);
+                    window.scrapedData = normalized;
+                    return normalized;
+                }
+                console.error('Unable to load results from results.txt', error);
+                return getEmptyData();
             }
-
-            renderDashboard(scrapedData);
-            document.getElementById('loader').classList.add('hidden');
         }
 
-        function normalizePayload(payload) {
+        function normalizePayload(payload = {}) {
             const resource = payload.resource || {};
             const motivation = payload.motivation || {};
+
             return {
                 links: resource.links || [],
                 images: resource.images || [],
@@ -599,148 +712,727 @@
             };
         }
 
-        // Rendering
-        function renderDashboard(data) {
-            const { pdfLinks, youtubeVideos, otherLinks } = categorizeLinks(data.links);
-            const uniqueImages = [...new Set(data.images)];
-            const uniqueVideos = [...new Set(data.videos)];
-            const motivationLinks = data.motivation;
-
-            // Update Stats
-            document.getElementById('stat-total').textContent = 
-                pdfLinks.length + youtubeVideos.length + otherLinks.length + motivationLinks.length;
-            document.getElementById('stat-pdfs').textContent = pdfLinks.length;
-            document.getElementById('stat-youtube').textContent = youtubeVideos.length;
-            document.getElementById('stat-visuals').textContent = uniqueImages.length + uniqueVideos.length;
-
-            // Render Sections
-            renderList('other-links', otherLinks);
-            renderList('motivation-links', motivationLinks.map(l => ({ url: l, label: l })));
-            renderGrid('pdf-list', pdfLinks, renderPdfCard);
-            renderGrid('youtube-videos', youtubeVideos, renderYoutubeCard);
-            renderGrid('images-gallery', uniqueImages, renderImageCard);
-            renderGrid('videos-gallery', uniqueVideos, renderVideoCard);
+        function getEmptyData() {
+            return { links: [], images: [], videos: [], motivation: [] };
         }
 
-        // Helpers
-        function categorizeLinks(links) {
+        document.addEventListener('DOMContentLoaded', () => {
+            setupLightbox();
+            scheduleSupportModal();
+            showLoader();
+            const dataLoad = scrapedDataPromise.then(populateDashboard);
+            const minimumDelay = new Promise(resolve => setTimeout(resolve, 12000));
+            Promise.allSettled([dataLoad, minimumDelay])
+                .finally(() => hideLoader());
+        });
+
+        async function populateDashboard(data) {
+            const safeData = data || { links: [], images: [], videos: [], motivation: [] };
+            const uniqueImages = uniqueList(safeData.images);
+            const uniqueVideos = uniqueList(safeData.videos);
+            const { pdfLinks, youtubeVideos, otherLinks } = categorizeLinks(safeData.links);
+            const motivationLinks = buildLinkItems(safeData.motivation);
+            const imageItems = uniqueImages.map(src => ({ src, label: buildImageLabel(src) }));
+            const videoItems = uniqueVideos.map(src => ({ src, label: buildMediaLabel(src) }));
+
+            const heroSummary = {
+                totalLinks: pdfLinks.length + youtubeVideos.length + otherLinks.length + motivationLinks.length,
+                pdfs: pdfLinks.length,
+                youtube: youtubeVideos.length,
+                visuals: imageItems.length + videoItems.length,
+                motivation: motivationLinks.length,
+                mediaTotal: imageItems.length + videoItems.length
+            };
+            updateHeroStats(heroSummary);
+
+            renderPdfGallery('pdf-list', pdfLinks, 'No PDFs available yet.');
+            renderLinkList('other-links', otherLinks, 'No other links available yet.');
+            renderLinkList('motivation-links', motivationLinks, 'No motivation links available yet.');
+            await renderYoutubeVideos('youtube-videos', youtubeVideos, 'No YouTube videos found.');
+            renderGallery('images-gallery', imageItems, 'image', 'No images to display.');
+            renderGallery('videos-gallery', videoItems, 'video', 'No videos to display.');
+        }
+
+        function categorizeLinks(links = []) {
             const pdfLinks = [];
             const youtubeVideos = [];
             const otherLinks = [];
             const seen = new Set();
 
-            links.forEach(link => {
+            (links || []).forEach(rawLink => {
+                if (!rawLink) return;
+                const link = rawLink.trim();
                 if (!link || seen.has(link)) return;
                 seen.add(link);
 
-                if (link.toLowerCase().endsWith('.pdf')) {
-                    pdfLinks.push({ url: link, label: link.split('/').pop() });
-                } else if (link.includes('youtube.com') || link.includes('youtu.be')) {
-                    const id = extractYoutubeId(link);
-                    if (id) youtubeVideos.push({ url: link, id });
-                } else {
-                    otherLinks.push({ url: link, label: link });
+                if (isPdf(link)) {
+                    pdfLinks.push({ url: link, label: buildDocumentLabel(link) });
+                    return;
                 }
+
+                const youtubeId = extractYoutubeId(link);
+                if (youtubeId) {
+                    youtubeVideos.push({ url: link, id: youtubeId, label: buildYoutubeLabel(link, youtubeId) });
+                    return;
+                }
+
+                otherLinks.push({ url: link, label: buildGenericLabel(link) });
             });
 
             return { pdfLinks, youtubeVideos, otherLinks };
         }
 
-        function extractYoutubeId(url) {
-            const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
-            const match = url.match(regExp);
-            return (match && match[2].length === 11) ? match[2] : null;
+        function buildLinkItems(links = []) {
+            const items = [];
+            const seen = new Set();
+
+            (links || []).forEach(rawLink => {
+                if (!rawLink) return;
+                const link = rawLink.trim();
+                if (!link || seen.has(link)) return;
+                seen.add(link);
+
+                if (isPdf(link)) {
+                    items.push({ url: link, label: buildDocumentLabel(link) });
+                    return;
+                }
+
+                const youtubeId = extractYoutubeId(link);
+                if (youtubeId) {
+                    items.push({ url: link, label: buildYoutubeLabel(link, youtubeId) });
+                    return;
+                }
+
+                items.push({ url: link, label: buildGenericLabel(link) });
+            });
+
+            return items;
         }
 
-        // Renderers
-        function renderList(containerId, items) {
+        function renderLinkList(containerId, items, emptyText) {
             const container = document.getElementById(containerId);
+            if (!container) return;
+            container.innerHTML = '';
+
             if (!items.length) {
-                container.innerHTML = '<div class="empty-state">No items found</div>';
+                const li = document.createElement('li');
+                li.className = 'empty-state';
+                li.textContent = emptyText;
+                container.appendChild(li);
                 return;
             }
-            
-            container.innerHTML = items.map(item => `
-                <div class="link-item">
-                    <div class="link-content">
-                        <a href="${item.url}" target="_blank" class="card-title">${item.label || item.url}</a>
-                        <span class="link-url">${new URL(item.url).hostname}</span>
-                    </div>
-                    <a href="${item.url}" target="_blank" class="btn">Open</a>
-                </div>
-            `).join('');
+
+            const fragment = document.createDocumentFragment();
+            items.forEach(item => {
+                const li = document.createElement('li');
+                const titleLink = document.createElement('a');
+                titleLink.className = 'link-title';
+                titleLink.href = item.url;
+                titleLink.target = '_blank';
+                titleLink.rel = 'noopener noreferrer';
+                titleLink.textContent = item.label;
+
+                const urlCopy = document.createElement('span');
+                urlCopy.className = 'link-url';
+                urlCopy.textContent = formatDisplayUrl(item.url);
+
+                li.appendChild(titleLink);
+                li.appendChild(urlCopy);
+                fragment.appendChild(li);
+            });
+            container.appendChild(fragment);
         }
 
-        function renderGrid(containerId, items, renderFn) {
+        function renderPdfGallery(containerId, pdfs, emptyText) {
             const container = document.getElementById(containerId);
-            if (!items.length) {
-                container.innerHTML = '<p style="color: var(--text-secondary)">No content available.</p>';
+            if (!container) return;
+            container.innerHTML = '';
+
+            if (!pdfs.length) {
+                const msg = document.createElement('p');
+                msg.className = 'empty-state';
+                msg.textContent = emptyText;
+                container.appendChild(msg);
                 return;
             }
-            container.innerHTML = items.map(renderFn).join('');
+
+            const fragment = document.createDocumentFragment();
+            pdfs.forEach(pdf => {
+                const card = document.createElement('div');
+                card.className = 'pdf-card';
+                card.tabIndex = 0;
+
+                const thumb = document.createElement('img');
+                thumb.className = 'pdf-thumb';
+                thumb.alt = `${pdf.label} preview`;
+                thumb.src = createPdfPlaceholder(pdf.label);
+
+                const title = document.createElement('div');
+                title.className = 'pdf-title';
+                title.textContent = pdf.label;
+
+                card.appendChild(thumb);
+                card.appendChild(title);
+                card.addEventListener('click', () => window.open(pdf.url, '_blank', 'noopener'));
+                card.addEventListener('keypress', event => {
+                    if (event.key === 'Enter') {
+                        window.open(pdf.url, '_blank', 'noopener');
+                    }
+                });
+
+                fragment.appendChild(card);
+                loadPdfThumbnail(pdf.url, thumb);
+            });
+            container.appendChild(fragment);
         }
 
-        function renderPdfCard(item) {
-            return `
-                <div class="card">
-                    <div class="card-body">
-                        <h3 class="card-title">PDF Document</h3>
-                        <p class="card-meta" style="word-break: break-all;">${item.label}</p>
-                        <a href="${item.url}" target="_blank" class="btn" style="margin-top: 1rem; text-align: center;">Download PDF</a>
-                    </div>
-                </div>
-            `;
+        function renderYoutubeVideos(containerId, videos, emptyText) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            container.innerHTML = '';
+
+            if (!videos.length) {
+                const msg = document.createElement('p');
+                msg.className = 'empty-state';
+                msg.textContent = emptyText;
+                container.appendChild(msg);
+                return;
+            }
+
+            const fragment = document.createDocumentFragment();
+            const pendingTitles = [];
+            videos.forEach(video => {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'media-card youtube-card';
+
+                const heading = document.createElement('h3');
+                heading.textContent = 'Loading title…';
+
+                const iframe = document.createElement('iframe');
+                iframe.src = `https://www.youtube-nocookie.com/embed/${video.id}?rel=0&modestbranding=1`;
+                iframe.frameBorder = '0';
+                iframe.allowFullscreen = true;
+                iframe.setAttribute('loading', 'lazy');
+                iframe.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
+                iframe.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share');
+
+                const pending = fetchYoutubeTitle(video).then(title => {
+                    heading.textContent = title;
+                }).catch(() => {
+                    heading.textContent = video.label || `YouTube Video (${video.id})`;
+                });
+                pendingTitles.push(pending);
+
+                wrapper.appendChild(heading);
+                wrapper.appendChild(iframe);
+                fragment.appendChild(wrapper);
+            });
+            container.appendChild(fragment);
+            return Promise.allSettled(pendingTitles);
         }
 
-        function renderYoutubeCard(item) {
-            return `
-                <div class="card">
-                    <div class="card-media">
-                        <iframe src="https://www.youtube.com/embed/${item.id}" loading="lazy" allowfullscreen></iframe>
-                    </div>
-                    <div class="card-body">
-                        <a href="${item.url}" target="_blank" class="card-title">Watch on YouTube</a>
-                    </div>
-                </div>
-            `;
+        function renderGallery(containerId, items, type, emptyText) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            container.innerHTML = '';
+
+            if (!items.length) {
+                const msg = document.createElement('p');
+                msg.className = 'empty-state';
+                msg.textContent = emptyText;
+                container.appendChild(msg);
+                return;
+            }
+
+            const fragment = document.createDocumentFragment();
+            items.forEach((item, index) => {
+                const cell = document.createElement('div');
+                cell.className = 'gallery-item';
+
+                if (type === 'image') {
+                    const img = document.createElement('img');
+                    img.src = item.src;
+                    img.alt = item.label || 'Discord image';
+                    img.loading = 'lazy';
+                    img.addEventListener('click', () => openLightbox(item.src, item.label, index, items));
+
+                    cell.appendChild(img);
+                } else {
+                    const video = document.createElement('video');
+                    video.className = 'video-player';
+                    video.controls = true;
+                    video.preload = 'metadata';
+                    const source = document.createElement('source');
+                    source.src = item.src;
+                    source.type = guessMimeType(item.src);
+                    video.appendChild(source);
+
+                    const caption = document.createElement('p');
+                    caption.className = 'media-caption';
+                    caption.textContent = item.label;
+
+                    const fallback = document.createElement('a');
+                    fallback.href = item.src;
+                    fallback.target = '_blank';
+                    fallback.rel = 'noopener noreferrer';
+                    fallback.textContent = 'Open video';
+
+                    cell.appendChild(caption);
+                    cell.appendChild(video);
+                    cell.appendChild(fallback);
+                }
+
+                fragment.appendChild(cell);
+            });
+            container.appendChild(fragment);
         }
 
-        function renderImageCard(src) {
-            return `
-                <div class="card" onclick="openLightbox('${src}')" style="cursor: pointer">
-                    <div class="card-media">
-                        <img src="${src}" loading="lazy" alt="Resource Image">
-                    </div>
-                </div>
-            `;
+        function uniqueList(items = []) {
+            return Array.from(new Set(items.map(item => item?.trim()).filter(Boolean)));
         }
 
-        function renderVideoCard(src) {
-            return `
-                <div class="card">
-                    <div class="card-media">
-                        <video src="${src}" controls preload="metadata"></video>
-                    </div>
-                </div>
-            `;
+        function isPdf(link) {
+            return /\.pdf(\?|$)/i.test(link);
         }
 
-        // UI Interactions
-        function openLightbox(src) {
-            const lightbox = document.getElementById('lightbox');
-            const img = document.getElementById('lightbox-img');
-            img.src = src;
-            lightbox.classList.add('active');
+        function extractYoutubeId(link) {
+            try {
+                const url = new URL(link);
+                const host = url.hostname.replace(/^www\./, '');
+
+                if (host === 'youtu.be') {
+                    return url.pathname.replace('/', '');
+                }
+
+                if (host.endsWith('youtube.com')) {
+                    if (url.pathname === '/watch') {
+                        return url.searchParams.get('v');
+                    }
+                    if (url.pathname.startsWith('/live/')) {
+                        return url.pathname.split('/')[2];
+                    }
+                    if (url.pathname.startsWith('/shorts/')) {
+                        return url.pathname.split('/')[2];
+                    }
+                }
+            } catch (error) {
+                return null;
+            }
+            return null;
         }
 
-        function closeLightbox(e) {
-            if (e.target !== document.getElementById('lightbox-img')) {
-                document.getElementById('lightbox').classList.remove('active');
+        function buildDocumentLabel(link) {
+            const name = extractLastSegment(link);
+            return name || 'PDF Document';
+        }
+
+        function buildYoutubeLabel(link, fallbackId) {
+            const name = extractLastSegment(link);
+            return name || `YouTube Video (${fallbackId})`;
+        }
+
+        function buildGenericLabel(link) {
+            try {
+                const url = new URL(link);
+                let path = url.pathname;
+                if (path.length > 50) {
+                    path = `${path.slice(0, 47)}...`;
+                }
+                return `${url.hostname}${path === '/' ? '' : path}`;
+            } catch (error) {
+                return link;
             }
         }
 
-        function closeSupport() {
-            document.getElementById('support-banner').classList.remove('visible');
+        function buildImageLabel(link) {
+            const segment = extractLastSegment(link);
+            return segment || getHostname(link) || 'Image';
+        }
+
+        function buildMediaLabel(link) {
+            const host = getHostname(link);
+            const segment = extractLastSegment(link);
+            const isDiscordCdn = host?.includes('cdn.discordapp.com');
+            if (segment && (!host || isDiscordCdn)) return segment;
+            if (segment && host) return `${host} • ${segment}`;
+            return segment || host || 'Video';
+        }
+
+        function getHostname(link) {
+            try {
+                const url = new URL(link);
+                return url.hostname;
+            } catch (error) {
+                return '';
+            }
+        }
+
+        function extractLastSegment(link) {
+            try {
+                const url = new URL(link);
+                const segments = url.pathname.split('/').filter(Boolean);
+                if (!segments.length) {
+                    return url.hostname;
+                }
+                const lastSegment = decodeURIComponent(segments.pop());
+                return lastSegment.replace(/\.[a-z0-9]+$/i, '').replace(/[-_]+/g, ' ').trim();
+            } catch (error) {
+                return link;
+            }
+        }
+
+        function guessMimeType(src) {
+            const ext = src.split('.').pop()?.split('?')[0]?.toLowerCase();
+            if (ext === 'webm') return 'video/webm';
+            return 'video/mp4';
+        }
+
+        function formatDisplayUrl(link) {
+            try {
+                const url = new URL(link);
+                const path = url.pathname === '/' ? '' : url.pathname;
+                const search = url.search || '';
+                return `${url.hostname}${path}${search}`;
+            } catch (error) {
+                return link;
+            }
+        }
+
+        function createPdfPlaceholder(label = 'PDF Document') {
+            const canvas = document.createElement('canvas');
+            canvas.width = 400;
+            canvas.height = 520;
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#eef2ff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#dbe4ff';
+            ctx.fillRect(0, 0, canvas.width, 140);
+            ctx.fillStyle = '#1d4ed8';
+            ctx.font = 'bold 56px "Segoe UI", Arial';
+            ctx.fillText('PDF', 140, 90);
+            ctx.fillStyle = '#1f2937';
+            ctx.font = '24px "Segoe UI", Arial';
+            wrapText(ctx, label, 30, 200, 340, 30);
+            return canvas.toDataURL('image/png');
+        }
+
+        async function loadPdfThumbnail(url, imgElement) {
+            if (!window.pdfjsLib || !imgElement) return;
+            const preview = await generatePdfThumbnail(url);
+            if (preview) {
+                imgElement.src = preview;
+            }
+        }
+
+        async function generatePdfThumbnail(url) {
+            if (!window.pdfjsLib) return null;
+            try {
+                const loadingTask = pdfjsLib.getDocument({ url, withCredentials: false });
+                const pdf = await loadingTask.promise;
+                const page = await pdf.getPage(1);
+                const viewport = page.getViewport({ scale: 0.5 });
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                canvas.width = viewport.width;
+                canvas.height = viewport.height;
+                await page.render({ canvasContext: context, viewport }).promise;
+                const dataUrl = canvas.toDataURL('image/png');
+                if (typeof pdf.cleanup === 'function') {
+                    pdf.cleanup();
+                }
+                if (typeof pdf.destroy === 'function') {
+                    pdf.destroy();
+                }
+                return dataUrl;
+            } catch (error) {
+                console.warn('Unable to generate PDF preview for', url, error);
+                return null;
+            }
+        }
+
+        function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
+            const words = text.split(/\s+/);
+            let line = '';
+            words.forEach(word => {
+                const testLine = `${line}${word} `;
+                const { width } = ctx.measureText(testLine);
+                if (width > maxWidth && line) {
+                    ctx.fillText(line.trim(), x, y);
+                    line = `${word} `;
+                    y += lineHeight;
+                } else {
+                    line = testLine;
+                }
+            });
+            if (line.trim()) {
+                ctx.fillText(line.trim(), x, y);
+            }
+        }
+
+        function setupLightbox() {
+            const container = document.getElementById('image-lightbox');
+            if (!container) return;
+            lightboxState.container = container;
+            lightboxState.image = document.getElementById('lightbox-photo');
+            lightboxState.caption = document.getElementById('lightbox-caption');
+
+            container.querySelectorAll('[data-lightbox-close]').forEach(element => {
+                element.addEventListener('click', closeLightbox);
+            });
+
+            container.addEventListener('click', event => {
+                if (event.target === container || event.target.classList.contains('lightbox-overlay')) {
+                    closeLightbox();
+                }
+            });
+
+            document.addEventListener('keydown', event => {
+                if (event.key === 'Escape') {
+                    closeLightbox();
+                    return;
+                }
+                if (event.key === 'ArrowRight') {
+                    navigateLightbox(1);
+                    return;
+                }
+                if (event.key === 'ArrowLeft') {
+                    navigateLightbox(-1);
+                }
+            });
+        }
+
+        function openLightbox(src, caption, index = null, items = null) {
+            if (!lightboxState.container) {
+                window.open(src, '_blank', 'noopener');
+                return;
+            }
+            if (Array.isArray(items) && items.length) {
+                lightboxState.items = items.map(entry => ({ src: entry.src, label: entry.label }));
+            }
+            if (typeof index === 'number') {
+                lightboxState.index = index;
+            } else if (!lightboxState.items.length) {
+                lightboxState.index = -1;
+            } else if (lightboxState.index === -1) {
+                lightboxState.index = Math.max(0, lightboxState.items.findIndex(item => item.src === src));
+            }
+            setLightboxContent(src, caption);
+            lightboxState.container.classList.remove('hidden');
+            requestAnimationFrame(() => lightboxState.container.classList.add('visible'));
+        }
+
+        function closeLightbox() {
+            if (!lightboxState.container || lightboxState.container.classList.contains('hidden')) return;
+            lightboxState.container.classList.remove('visible');
+            setTimeout(() => {
+                lightboxState.container.classList.add('hidden');
+                lightboxState.image.src = '';
+                lightboxState.caption.textContent = '';
+                lightboxState.index = -1;
+            }, 200);
+        }
+
+        function navigateLightbox(direction) {
+            if (!lightboxState.container || lightboxState.container.classList.contains('hidden')) return;
+            if (!lightboxState.items.length) return;
+            const total = lightboxState.items.length;
+            if (total === 0) return;
+            const currentIndex = typeof lightboxState.index === 'number' && lightboxState.index >= 0
+                ? lightboxState.index
+                : 0;
+            let nextIndex = currentIndex + direction;
+            if (nextIndex < 0) {
+                nextIndex = total - 1;
+            } else if (nextIndex >= total) {
+                nextIndex = 0;
+            }
+            lightboxState.index = nextIndex;
+            const nextItem = lightboxState.items[nextIndex];
+            if (nextItem) {
+                setLightboxContent(nextItem.src, nextItem.label);
+            }
+        }
+
+        function setLightboxContent(src, caption) {
+            if (!lightboxState.image) return;
+            lightboxState.image.src = src;
+            lightboxState.image.alt = caption || 'Image preview';
+            if (lightboxState.caption) {
+                lightboxState.caption.textContent = caption || '';
+            }
+        }
+
+        function scheduleSupportModal() {
+            const modal = document.getElementById('support-modal');
+            if (!modal) return;
+            const closeBtn = modal.querySelector('.support-close');
+            const hideModal = () => {
+                modal.classList.remove('visible');
+                modal.setAttribute('aria-hidden', 'true');
+            };
+            closeBtn?.addEventListener('click', hideModal);
+            supportTimer = setTimeout(() => {
+                modal.classList.add('visible');
+                modal.setAttribute('aria-hidden', 'false');
+            }, 45000);
+        }
+
+        function showLoader() {
+            if (loaderElement) {
+                loaderElement.classList.remove('hidden');
+            }
+        }
+
+        function hideLoader() {
+            if (loaderElement) {
+                loaderElement.classList.add('hidden');
+            }
+        }
+
+        function updateHeroStats(summary = {}) {
+            if (!heroUi.total) return;
+            const total = Math.max(0, summary.totalLinks || 0);
+            animateCounter(heroUi.total, total);
+            animateCounter(heroUi.pdfs, summary.pdfs || 0);
+            animateCounter(heroUi.youtube, summary.youtube || 0);
+            animateCounter(heroUi.visuals, summary.visuals || 0);
+            animateCounter(heroUi.motivation, summary.motivation || 0);
+
+            const streakValue = total === 0
+                ? 0
+                : Math.max(1, Math.min(99, Math.round(total / 4)));
+            if (heroUi.streak) {
+                heroUi.streak.textContent = `${streakValue}d`;
+            }
+
+            const visualsTotal = summary.mediaTotal ?? summary.visuals ?? 0;
+            updateRewardTrack(total);
+            updateXpMeter(total, visualsTotal);
+            updatePulse(heroUi.pulseLinks, total, 'drops logged');
+            updatePulse(heroUi.pulseVisuals, summary.visuals || 0, 'visuals curated');
+            updatePulse(heroUi.pulseEnergy, computeXp(total, visualsTotal), 'XP surge');
+        }
+
+        function computeXp(total, mediaTotal) {
+            return Math.max(0, (total * 9) + (mediaTotal * 5));
+        }
+
+        function updateRewardTrack(total) {
+            if (!heroUi.trackNodes || heroUi.trackNodes.length === 0) {
+                updateRewardNote(total, null);
+                return;
+            }
+            let nextTier = null;
+            heroUi.trackNodes.forEach(node => {
+                const threshold = Number(node.dataset.threshold || 0);
+                const earned = total >= threshold;
+                node.classList.toggle('earned', earned);
+                if (!earned && !nextTier) {
+                    nextTier = { label: node.dataset.tier || 'Next tier', amount: threshold };
+                }
+            });
+            updateRewardNote(total, nextTier);
+        }
+
+        function updateRewardNote(total, nextTier) {
+            if (!heroUi.rewardNote) return;
+            if (!heroUi.trackNodes || heroUi.trackNodes.length === 0) {
+                heroUi.rewardNote.textContent = `${numberFormatter.format(Math.max(0, total))} drops logged across the vault.`;
+                return;
+            }
+            if (!nextTier) {
+                heroUi.rewardNote.textContent = 'Legend tier reached. Keep compounding the edge.';
+                return;
+            }
+            const diff = Math.max(1, nextTier.amount - total);
+            heroUi.rewardNote.textContent = `${diff} more drops to hit ${nextTier.label}.`;
+        }
+
+        function updateXpMeter(total, mediaTotal) {
+            if (!heroUi.xpFill) return;
+            const xp = computeXp(total, mediaTotal);
+            const percent = xp % 100;
+            const normalized = xp === 0 ? 0 : (percent === 0 ? 100 : percent);
+            heroUi.xpFill.style.width = `${normalized}%`;
+            if (heroUi.xpLabel) {
+                heroUi.xpLabel.textContent = normalized === 100
+                    ? 'Bonus ready — drop another link.'
+                    : `${100 - Math.round(normalized)} XP to next boost`;
+            }
+        }
+
+        function updatePulse(element, value, label) {
+            if (!element) return;
+            const safe = Math.max(0, Math.floor(value || 0));
+            element.textContent = `${numberFormatter.format(safe)} ${label}`;
+        }
+
+        function animateCounter(element, value) {
+            if (!element) return;
+            const target = Math.max(0, Math.floor(value || 0));
+            const currentStored = Number(element.dataset.value || element.textContent.replace(/[^0-9]/g, '')) || 0;
+            const duration = 600;
+            if (currentStored === target) {
+                element.textContent = numberFormatter.format(target);
+                element.dataset.value = target;
+                return;
+            }
+            const startTime = performance.now();
+            const step = (now) => {
+                const progress = Math.min(1, (now - startTime) / duration);
+                const currentValue = Math.round(currentStored + (target - currentStored) * progress);
+                element.textContent = numberFormatter.format(currentValue);
+                if (progress < 1) {
+                    requestAnimationFrame(step);
+                } else {
+                    element.dataset.value = target;
+                }
+            };
+            requestAnimationFrame(step);
+        }
+
+        function showTab(event, tabId) {
+            document.querySelectorAll('.content').forEach(section => section.classList.remove('active'));
+            const activeSection = document.getElementById(tabId);
+            if (activeSection) {
+                activeSection.classList.add('active');
+            }
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            const trigger = event?.currentTarget || document.querySelector(`.tab[data-tab="${tabId}"]`);
+            trigger?.classList.add('active');
+        }
+
+        function jumpToSection(tabId) {
+            const trigger = document.querySelector(`.tab[data-tab="${tabId}"]`);
+            trigger?.click();
+            const section = document.getElementById(tabId);
+            section?.scrollIntoView({ behavior: 'smooth' });
+            trigger?.scrollIntoView({ behavior: 'smooth', inline: 'center' });
+        }
+
+        async function fetchYoutubeTitle(video) {
+            const cacheKey = video.id;
+            if (youtubeTitleCache.has(cacheKey)) {
+                return youtubeTitleCache.get(cacheKey);
+            }
+
+            const targetUrl = video.url && video.url.includes('youtube')
+                ? video.url
+                : `https://www.youtube.com/watch?v=${video.id}`;
+            const endpoint = `https://noembed.com/embed?url=${encodeURIComponent(targetUrl)}`;
+
+            try {
+                const response = await fetch(endpoint);
+                if (!response.ok) throw new Error('NoEmbed failed');
+                const data = await response.json();
+                const title = data.title || video.label || `YouTube Video (${video.id})`;
+                youtubeTitleCache.set(cacheKey, title);
+                return title;
+            } catch (error) {
+                const fallback = video.label || `YouTube Video (${video.id})`;
+                youtubeTitleCache.set(cacheKey, fallback);
+                return fallback;
+            }
         }
     </script>
 </body>
