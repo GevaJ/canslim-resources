@@ -2,6 +2,8 @@
         const rewardNodeList = Array.from(document.querySelectorAll('.reward-track [data-threshold]')).sort((a, b) => {
             return Number(a.dataset.threshold || 0) - Number(b.dataset.threshold || 0);
         });
+        const MEMBER_KEY = 'member';
+        const ACCESS_CODE = '1111';
         const heroUi = {
             total: document.getElementById('stat-total'),
             pdfs: document.getElementById('stat-pdfs'),
@@ -74,6 +76,7 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             setupLightbox();
+            initPdfAccessGate();
             scheduleSupportModal();
             showLoader();
             const dataLoad = scrapedDataPromise.then(populateDashboard);
@@ -656,6 +659,67 @@
                 modal.classList.add('visible');
                 modal.setAttribute('aria-hidden', 'false');
             }, 45000);
+        }
+
+        function initPdfAccessGate() {
+            const gate = document.getElementById('pdf-access-gate');
+            const form = document.getElementById('pdf-code-form');
+            const codeInput = document.getElementById('pdf-access-code');
+            const pdfList = document.getElementById('pdf-list');
+            const locked = document.getElementById('pdf-locked');
+            const error = document.getElementById('pdf-error');
+            if (!gate || !form || !codeInput || !pdfList || !locked) return;
+
+            const applyState = (unlocked) => {
+                gate.classList.toggle('hidden', unlocked);
+                pdfList.classList.toggle('hidden', !unlocked);
+                locked.classList.toggle('hidden', !!unlocked);
+                error?.classList.add('hidden');
+            };
+
+            applyState(isMember());
+
+            form.addEventListener('submit', event => {
+                event.preventDefault();
+                const attempt = codeInput.value.trim();
+                if (attempt === ACCESS_CODE) {
+                    persistMemberAccess();
+                    applyState(true);
+                    codeInput.value = '';
+                    return;
+                }
+                clearMemberAccess();
+                locked.classList.remove('hidden');
+                pdfList.classList.add('hidden');
+                gate.classList.remove('hidden');
+                if (error) {
+                    error.classList.remove('hidden');
+                }
+            });
+        }
+
+        function persistMemberAccess() {
+            try {
+                localStorage.setItem(MEMBER_KEY, 'true');
+            } catch (error) {
+                console.warn('Unable to persist membership flag', error);
+            }
+        }
+
+        function clearMemberAccess() {
+            try {
+                localStorage.removeItem(MEMBER_KEY);
+            } catch (error) {
+                console.warn('Unable to clear membership flag', error);
+            }
+        }
+
+        function isMember() {
+            try {
+                return localStorage.getItem(MEMBER_KEY) === 'true';
+            } catch (error) {
+                return false;
+            }
         }
 
         function showLoader() {

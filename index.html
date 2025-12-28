@@ -34,6 +34,9 @@
             letter-spacing: 0.08em;
             margin: 0;
         }
+        .hidden {
+            display: none !important;
+        }
         a {
             color: var(--accent-2);
             text-decoration: underline;
@@ -360,6 +363,62 @@
         .books-link {
             font-weight: 700;
         }
+        .pdf-gate {
+            border: 2px dashed var(--accent);
+            background: rgba(8, 8, 8, 0.7);
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        .pdf-gate h3 {
+            margin-bottom: 0.35rem;
+            color: var(--accent);
+        }
+        .pdf-gate p {
+            margin: 0 0 0.6rem;
+            color: var(--subtext);
+        }
+        .code-form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .code-form input {
+            flex: 1;
+            min-width: 180px;
+            padding: 0.55rem 0.75rem;
+            border: 1px solid var(--border);
+            background: #020202;
+            color: var(--text);
+            font-size: 1rem;
+        }
+        .code-form button {
+            padding: 0.55rem 1rem;
+            border: 1px solid var(--accent);
+            background: var(--accent);
+            color: #000;
+            font-weight: 700;
+            cursor: pointer;
+            text-transform: uppercase;
+        }
+        .code-form button:hover {
+            box-shadow: 0 0 12px rgba(255, 224, 102, 0.6);
+        }
+        .gate-error {
+            color: #ff9b71;
+            margin-top: 0.35rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .pdf-locked {
+            margin: 0.75rem 0 1rem;
+            text-align: center;
+        }
+        .pdf-locked img {
+            max-width: 100%;
+            height: auto;
+            border: 2px solid var(--border);
+        }
         .support-modal {
             position: fixed;
             inset: 0;
@@ -633,7 +692,19 @@
 
                 <div id="pdfs" class="content">
                     <h2>PDFs</h2>
-                    <div id="pdf-list" class="pdf-grid"></div>
+                    <div id="pdf-access-gate" class="pdf-gate">
+                        <h3>Members Only</h3>
+                        <p>Access code is provided after supporting via <a href="http://ko-fi.com/ibd_canslim_investor_network/tiers" target="_blank" rel="noopener noreferrer">Ko-fi members page</a>. Enter it to unlock the PDF vault.</p>
+                        <form id="pdf-code-form" class="code-form">
+                            <input id="pdf-access-code" type="password" inputmode="numeric" autocomplete="off" placeholder="Enter code" aria-label="PDF access code" required>
+                            <button type="submit">Unlock PDFs</button>
+                        </form>
+                        <div id="pdf-error" class="gate-error hidden">Incorrect code. Support the network below to join.</div>
+                    </div>
+                    <div id="pdf-locked" class="pdf-locked hidden">
+                        <a href="http://ko-fi.com/ibd_canslim_investor_network/tiers" target="_blank" rel="noopener noreferrer"><img src="./locked-content.png" alt="CANSLIM members" loading="lazy" decoding="async"></a>
+                    </div>
+                    <div id="pdf-list" class="pdf-grid hidden"></div>
                 </div>
 
                 <div id="youtube" class="content">
