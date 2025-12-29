@@ -37,6 +37,21 @@
         .hidden {
             display: none !important;
         }
+        .member-banner {
+            position: relative;
+            z-index: 2;
+            margin: 1rem auto 0;
+            width: min(1100px, 96vw);
+            padding: 0.85rem 1.2rem;
+            border: 2px solid var(--accent);
+            background: linear-gradient(90deg, rgba(0, 255, 138, 0.14), rgba(255, 224, 102, 0.12));
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-weight: 700;
+            box-shadow: 0 0 16px rgba(0, 255, 138, 0.25);
+            text-align: center;
+        }
         a {
             color: var(--accent-2);
             text-decoration: underline;
@@ -609,6 +624,7 @@
 <body>
     <div class="bg-aurora" aria-hidden="true"></div>
     <div class="bg-grid" aria-hidden="true"></div>
+    <div id="member-banner" class="member-banner hidden" role="status">Thank you for backing the CANSLIM community. 🙂</div>
 
     <table class="retro-frame" role="presentation">
         <tr class="retro-banner">
@@ -672,6 +688,7 @@
                     <div class="tab" data-tab="images" onclick="showTab(event, 'images')">Images</div>
                     <div class="tab" data-tab="videos" onclick="showTab(event, 'videos')">Videos</div>
                     <div class="tab" data-tab="books" onclick="showTab(event, 'books')">Books</div>
+                    <a class="tab" href="https://discord.com/users/378576756065697802" target="_blank" rel="noopener noreferrer">Support</a>
                     <a class="tab discord-link" href="https://discord.gg/xUz3nXZ3p5" target="_blank" rel="noopener noreferrer">
                         <span>Discord</span>
                     </a>

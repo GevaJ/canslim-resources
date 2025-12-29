@@ -3,7 +3,8 @@
             return Number(a.dataset.threshold || 0) - Number(b.dataset.threshold || 0);
         });
         const MEMBER_KEY = 'member';
-        const ACCESS_CODE = '1111';
+        const ACCESS_CODE_HASH = '0ffe1abd1a08215353c233d6e009613e95eec4253832a761af28ff37ac5a150c';
+        const HASH_ALGO = 'SHA-256';
         const heroUi = {
             total: document.getElementById('stat-total'),
             pdfs: document.getElementById('stat-pdfs'),
@@ -78,6 +79,7 @@
             setupLightbox();
             initPdfAccessGate();
             scheduleSupportModal();
+            toggleMemberBanner(isMember());
             showLoader();
             const dataLoad = scrapedDataPromise.then(populateDashboard);
             const minimumDelay = new Promise(resolve => setTimeout(resolve, 1200));
@@ -655,10 +657,31 @@
                 modal.setAttribute('aria-hidden', 'true');
             };
             closeBtn?.addEventListener('click', hideModal);
+            if (isMember()) {
+                hideSupportModal();
+                return;
+            }
             supportTimer = setTimeout(() => {
                 modal.classList.add('visible');
                 modal.setAttribute('aria-hidden', 'false');
             }, 45000);
+        }
+
+        function hideSupportModal() {
+            const modal = document.getElementById('support-modal');
+            if (!modal) return;
+            modal.classList.remove('visible');
+            modal.setAttribute('aria-hidden', 'true');
+            if (supportTimer) {
+                clearTimeout(supportTimer);
+                supportTimer = null;
+            }
+        }
+
+        function toggleMemberBanner(visible) {
+            const banner = document.getElementById('member-banner');
+            if (!banner) return;
+            banner.classList.toggle('hidden', !visible);
         }
 
         function initPdfAccessGate() {
@@ -679,16 +702,21 @@
 
             applyState(isMember());
 
-            form.addEventListener('submit', event => {
+            form.addEventListener('submit', async event => {
                 event.preventDefault();
                 const attempt = codeInput.value.trim();
-                if (attempt === ACCESS_CODE) {
+                const hashedAttempt = await hashAccessCode(attempt);
+                const isValid = hashedAttempt && timingSafeEquals(hashedAttempt, ACCESS_CODE_HASH);
+                if (isValid) {
                     persistMemberAccess();
                     applyState(true);
+                    hideSupportModal();
+                    toggleMemberBanner(true);
                     codeInput.value = '';
                     return;
                 }
                 clearMemberAccess();
+                toggleMemberBanner(false);
                 locked.classList.remove('hidden');
                 pdfList.classList.add('hidden');
                 gate.classList.remove('hidden');
@@ -696,6 +724,31 @@
                     error.classList.remove('hidden');
                 }
             });
+        }
+
+        async function hashAccessCode(input) {
+            try {
+                if (!window.crypto?.subtle || typeof TextEncoder === 'undefined') {
+                    return null;
+                }
+                const encoded = new TextEncoder().encode(input);
+                const digest = await crypto.subtle.digest(HASH_ALGO, encoded);
+                return Array.from(new Uint8Array(digest))
+                    .map(byte => byte.toString(16).padStart(2, '0'))
+                    .join('');
+            } catch (error) {
+                console.warn('Unable to hash access code', error);
+                return null;
+            }
+        }
+
+        function timingSafeEquals(a, b) {
+            if (!a || !b || a.length !== b.length) return false;
+            let mismatch = 0;
+            for (let i = 0; i < a.length; i += 1) {
+                mismatch |= a.charCodeAt(i) ^ b.charCodeAt(i);
+            }
+            return mismatch === 0;
         }
 
         function persistMemberAccess() {
