@@ -1007,6 +1007,13 @@
             document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
             const trigger = event?.currentTarget || document.querySelector(`.tab[data-tab="${tabId}"]`);
             trigger?.classList.add('active');
+
+            if (tabId === 'twitter') {
+                const twitterContainer = document.getElementById('twitter-posts');
+                if (twitterContainer) {
+                    ensureTwitterWidgets(twitterContainer);
+                }
+            }
         }
 
         function jumpToSection(tabId) {
