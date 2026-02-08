@@ -350,10 +350,14 @@
             box-shadow: 0 0 12px rgba(0,255,118,0.2);
             padding: 0.9rem;
         }
-        .twitter-card blockquote {
-            margin: 0;
+        .twitter-embed {
+            width: 100%;
+            height: 420px;
+            border: 1px solid var(--border);
+            background: #000;
         }
         .twitter-fallback {
+            display: inline-block;
             font-size: 0.85rem;
             color: var(--subtext);
             text-transform: uppercase;
@@ -742,7 +746,6 @@
     </div>
 
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.min.js" integrity="sha512-O5bY5p+qZ+nhewc7ovQoPGwTpghSJOnA7xz/ES6sDIo8He3G6gZj/O9oYF6W1hLECPaKhLPgH8JbImTeTTKQ0g==" crossorigin="anonymous"></script>
-    <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
     <script defer src="results-inline.js"></script>
     <script defer src="main.js"></script>
 </body>
