@@ -344,6 +344,21 @@
             min-height: 200px;
             border: 2px solid var(--border);
         }
+        .twitter-card {
+            background: rgba(0,0,0,0.75);
+            border: 2px solid rgba(255,224,102,0.4);
+            box-shadow: 0 0 12px rgba(0,255,118,0.2);
+            padding: 0.9rem;
+        }
+        .twitter-card blockquote {
+            margin: 0;
+        }
+        .twitter-fallback {
+            font-size: 0.85rem;
+            color: var(--subtext);
+            text-transform: uppercase;
+            margin-top: 0.6rem;
+        }
         .media-caption {
             font-size: 0.85rem;
             color: var(--subtext);
@@ -648,12 +663,11 @@
                 </div>
                 <div class="tabs">
                     <div class="tab active" data-tab="home" onclick="showTab(event, 'home')">Home</div>
-                    <div class="tab" data-tab="motivation" onclick="showTab(event, 'motivation')">Motivation</div>
                     <div class="tab" data-tab="pdfs" onclick="showTab(event, 'pdfs')">PDFs</div>
                     <div class="tab" data-tab="youtube" onclick="showTab(event, 'youtube')">YouTube</div>
+                    <div class="tab" data-tab="twitter" onclick="showTab(event, 'twitter')">X / Twitter</div>
                     <div class="tab" data-tab="images" onclick="showTab(event, 'images')">Images</div>
                     <div class="tab" data-tab="videos" onclick="showTab(event, 'videos')">Videos</div>
-                    <div class="tab" data-tab="books" onclick="showTab(event, 'books')">Books</div>
                     <a class="tab" href="https://discord.com/users/378576756065697802" target="_blank" rel="noopener noreferrer">Support</a>
                     <a class="tab discord-link" href="https://discord.gg/xUz3nXZ3p5" target="_blank" rel="noopener noreferrer">
                         <span>Discord</span>
@@ -666,11 +680,6 @@
                 <div id="home" class="content active">
                     <h2>Other Links</h2>
                     <ol id="other-links" class="link-list"></ol>
-                </div>
-
-                <div id="motivation" class="content">
-                    <h2>Motivation</h2>
-                    <ol id="motivation-links" class="link-list"></ol>
                 </div>
 
                 <div id="pdfs" class="content">
@@ -695,6 +704,11 @@
                     <div id="youtube-videos" class="youtube-grid"></div>
                 </div>
 
+                <div id="twitter" class="content">
+                    <h2>X / Twitter Posts</h2>
+                    <div id="twitter-posts" class="youtube-grid"></div>
+                </div>
+
                 <div id="images" class="content">
                     <h2>Images</h2>
                     <h3>Use left and right arrows to scroll images</h3>
@@ -704,17 +718,6 @@
                 <div id="videos" class="content">
                     <h2>Discord Videos</h2>
                     <div id="videos-gallery" class="gallery"></div>
-                </div>
-
-                <div id="books" class="content">
-                    <h2>Support the community to gain access to the full CANSLIM books library.</h2>
-                    <p>
-                        Pitch in to keep the resource growing and unlock the curated bookshelf by backing us on
-                        <a class="books-link" href="http://ko-fi.com/ibd_canslim_investor_network/tiers" target="_blank" rel="noopener noreferrer">Ko-fi</a>.
-                    </p>
-                    <div class="books-hero">
-                        <a href="http://ko-fi.com/ibd_canslim_investor_network/tiers" target="_blank" rel="noopener noreferrer"><img src="./locked-content.png" alt="CANSLIM book list preview" loading="lazy" decoding="async"></a>
-                    </div>
                 </div>
             </td>
         </tr>

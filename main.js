@@ -32,6 +32,7 @@
         const lightboxState = { container: null, image: null, caption: null, items: [], index: -1 };
         let supportTimer = null;
         const youtubeTitleCache = new Map();
+        let twitterWidgetPromise = null;
 
         async function loadScrapedData() {
             if (window.scrapedData && Array.isArray(window.scrapedData.links)) {
@@ -91,13 +92,14 @@
             const safeData = data || { links: [], images: [], videos: [], motivation: [] };
             const uniqueImages = uniqueList(safeData.images);
             const uniqueVideos = uniqueList(safeData.videos);
-            const { pdfLinks, youtubeVideos, otherLinks } = categorizeLinks(safeData.links);
-            const motivationLinks = buildLinkItems(safeData.motivation);
+            const { pdfLinks, youtubeVideos, otherLinks, twitterPosts } = categorizeLinks(safeData.links);
+            const { motivationLinks, twitterPosts: motivationPosts } = categorizeMotivationLinks(safeData.motivation);
+            const mergedTwitterPosts = mergeUniqueLinks([...twitterPosts, ...motivationPosts]);
             const imageItems = uniqueImages.map(src => ({ src, label: buildImageLabel(src) }));
             const videoItems = uniqueVideos.map(src => ({ src, label: buildMediaLabel(src) }));
 
             const heroSummary = {
-                totalLinks: pdfLinks.length + youtubeVideos.length + otherLinks.length + motivationLinks.length,
+                totalLinks: pdfLinks.length + youtubeVideos.length + otherLinks.length + motivationLinks.length + mergedTwitterPosts.length,
                 pdfs: pdfLinks.length,
                 youtube: youtubeVideos.length,
                 visuals: imageItems.length + videoItems.length,
@@ -110,6 +112,7 @@
             renderLinkList('other-links', otherLinks, 'No other links available yet.');
             renderLinkList('motivation-links', motivationLinks, 'No motivation links available yet.');
             await renderYoutubeVideos('youtube-videos', youtubeVideos, 'No YouTube videos found.');
+            renderTwitterPosts('twitter-posts', mergedTwitterPosts, 'No X/Twitter posts found.');
             renderGallery('images-gallery', imageItems, 'image', 'No images to display.');
             renderGallery('videos-gallery', videoItems, 'video', 'No videos to display.');
         }
@@ -118,6 +121,7 @@
             const pdfLinks = [];
             const youtubeVideos = [];
             const otherLinks = [];
+            const twitterPosts = [];
             const seen = new Set();
 
             (links || []).forEach(rawLink => {
@@ -137,10 +141,50 @@
                     return;
                 }
 
+                const twitterId = extractTwitterStatusId(link);
+                if (twitterId) {
+                    twitterPosts.push({ url: link, id: twitterId });
+                    return;
+                }
+
                 otherLinks.push({ url: link, label: buildGenericLabel(link) });
             });
 
-            return { pdfLinks, youtubeVideos, otherLinks };
+            return { pdfLinks, youtubeVideos, otherLinks, twitterPosts };
+        }
+
+        function categorizeMotivationLinks(links = []) {
+            const motivationLinks = [];
+            const twitterPosts = [];
+            const seen = new Set();
+
+            (links || []).forEach(rawLink => {
+                if (!rawLink) return;
+                const link = rawLink.trim();
+                if (!link || seen.has(link)) return;
+                seen.add(link);
+
+                const twitterId = extractTwitterStatusId(link);
+                if (twitterId) {
+                    twitterPosts.push({ url: link, id: twitterId });
+                    return;
+                }
+
+                if (isPdf(link)) {
+                    motivationLinks.push({ url: link, label: buildDocumentLabel(link) });
+                    return;
+                }
+
+                const youtubeId = extractYoutubeId(link);
+                if (youtubeId) {
+                    motivationLinks.push({ url: link, label: buildYoutubeLabel(link, youtubeId) });
+                    return;
+                }
+
+                motivationLinks.push({ url: link, label: buildGenericLabel(link) });
+            });
+
+            return { motivationLinks, twitterPosts };
         }
 
         function buildLinkItems(links = []) {
@@ -317,6 +361,48 @@
             return Promise.allSettled(pendingTitles);
         }
 
+        function renderTwitterPosts(containerId, posts, emptyText) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            container.innerHTML = '';
+
+            if (!posts.length) {
+                const msg = document.createElement('p');
+                msg.className = 'empty-state';
+                msg.textContent = emptyText;
+                container.appendChild(msg);
+                return;
+            }
+
+            const fragment = document.createDocumentFragment();
+            posts.forEach(post => {
+                const card = document.createElement('div');
+                card.className = 'twitter-card';
+
+                const blockquote = document.createElement('blockquote');
+                blockquote.className = 'twitter-tweet';
+                blockquote.setAttribute('data-theme', 'dark');
+                blockquote.setAttribute('data-dnt', 'true');
+
+                const link = document.createElement('a');
+                link.href = post.url;
+                link.target = '_blank';
+                link.rel = 'noopener noreferrer';
+                link.textContent = 'View post on X';
+
+                const fallback = document.createElement('div');
+                fallback.className = 'twitter-fallback';
+                fallback.textContent = 'Loading post…';
+
+                blockquote.appendChild(link);
+                card.appendChild(blockquote);
+                card.appendChild(fallback);
+                fragment.appendChild(card);
+            });
+            container.appendChild(fragment);
+            ensureTwitterWidgets(container);
+        }
+
         function renderGallery(containerId, items, type, emptyText) {
             const container = document.getElementById(containerId);
             if (!container) return;
@@ -377,6 +463,15 @@
             return Array.from(new Set(items.map(item => item?.trim()).filter(Boolean)));
         }
 
+        function mergeUniqueLinks(items = []) {
+            const seen = new Set();
+            return items.filter(item => {
+                if (!item?.url || seen.has(item.url)) return false;
+                seen.add(item.url);
+                return true;
+            });
+        }
+
         function isPdf(link) {
             return /\.pdf(\?|$)/i.test(link);
         }
@@ -384,7 +479,7 @@
         function extractYoutubeId(link) {
             try {
                 const url = new URL(link);
-                const host = url.hostname.replace(/^www\./, '');
+                const host = url.hostname.replace(/^(www|m)\./, '');
 
                 if (host === 'youtu.be') {
                     return url.pathname.replace('/', '');
@@ -405,6 +500,20 @@
                 return null;
             }
             return null;
+        }
+
+        function extractTwitterStatusId(link) {
+            try {
+                const url = new URL(link);
+                const host = url.hostname.replace(/^(www|mobile|m)\./, '');
+                if (host !== 'twitter.com' && host !== 'x.com') {
+                    return null;
+                }
+                const match = url.pathname.match(/\/status\/(\d+)/);
+                return match ? match[1] : null;
+            } catch (error) {
+                return null;
+            }
         }
 
         function buildDocumentLabel(link) {
@@ -931,4 +1040,29 @@
                 youtubeTitleCache.set(cacheKey, fallback);
                 return fallback;
             }
+        }
+
+        function ensureTwitterWidgets(container) {
+            if (window.twttr?.widgets?.load) {
+                window.twttr.widgets.load(container);
+                return;
+            }
+
+            if (!twitterWidgetPromise) {
+                twitterWidgetPromise = new Promise(resolve => {
+                    const script = document.createElement('script');
+                    script.src = 'https://platform.twitter.com/widgets.js';
+                    script.async = true;
+                    script.charset = 'utf-8';
+                    script.onload = () => resolve(true);
+                    script.onerror = () => resolve(false);
+                    document.head.appendChild(script);
+                });
+            }
+
+            twitterWidgetPromise.then(() => {
+                if (window.twttr?.widgets?.load) {
+                    window.twttr.widgets.load(container);
+                }
+            });
         }
