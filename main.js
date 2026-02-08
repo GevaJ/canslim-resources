@@ -32,6 +32,7 @@
         const lightboxState = { container: null, image: null, caption: null, items: [], index: -1 };
         let supportTimer = null;
         const youtubeTitleCache = new Map();
+        let twitterWidgetPromise = null;
 
         async function loadScrapedData() {
             if (window.scrapedData && Array.isArray(window.scrapedData.links)) {
@@ -377,27 +378,31 @@
             posts.forEach(post => {
                 const card = document.createElement('div');
                 card.className = 'twitter-card';
+                card.dataset.tweetId = post.id;
+                card.dataset.tweetUrl = post.url;
 
-                const iframe = document.createElement('iframe');
-                iframe.className = 'twitter-embed';
-                iframe.title = 'X / Twitter post';
-                iframe.loading = 'lazy';
-                iframe.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
-                iframe.allowFullscreen = true;
-                iframe.src = `https://platform.twitter.com/embed/Tweet.html?id=${post.id}&theme=dark&dnt=true`;
+                const blockquote = document.createElement('blockquote');
+                blockquote.className = 'twitter-tweet';
+                blockquote.setAttribute('data-theme', 'dark');
+                blockquote.setAttribute('data-dnt', 'true');
 
                 const link = document.createElement('a');
                 link.href = post.url;
                 link.target = '_blank';
                 link.rel = 'noopener noreferrer';
-                link.className = 'twitter-fallback';
-                link.textContent = 'Open post on X';
+                link.textContent = 'View post on X';
 
-                card.appendChild(iframe);
-                card.appendChild(link);
+                const fallback = document.createElement('div');
+                fallback.className = 'twitter-fallback';
+                fallback.textContent = 'Loading post…';
+
+                blockquote.appendChild(link);
+                card.appendChild(blockquote);
+                card.appendChild(fallback);
                 fragment.appendChild(card);
             });
             container.appendChild(fragment);
+            ensureTwitterWidgets(container);
         }
 
         function renderGallery(containerId, items, type, emptyText) {
@@ -1037,4 +1042,77 @@
                 youtubeTitleCache.set(cacheKey, fallback);
                 return fallback;
             }
+        }
+
+        function ensureTwitterWidgets(container) {
+            if (window.twttr?.widgets?.load) {
+                window.twttr.widgets.load(container);
+                scheduleTwitterFallback(container);
+                return;
+            }
+
+            if (!twitterWidgetPromise) {
+                twitterWidgetPromise = new Promise(resolve => {
+                    const script = document.createElement('script');
+                    script.src = 'https://platform.twitter.com/widgets.js';
+                    script.async = true;
+                    script.charset = 'utf-8';
+                    script.onload = () => resolve(true);
+                    script.onerror = () => resolve(false);
+                    document.head.appendChild(script);
+                });
+            }
+
+            twitterWidgetPromise.then(() => {
+                if (window.twttr?.widgets?.load) {
+                    window.twttr.widgets.load(container);
+                }
+                scheduleTwitterFallback(container);
+            });
+        }
+
+        function scheduleTwitterFallback(container) {
+            setTimeout(() => {
+                container.querySelectorAll('.twitter-card').forEach(card => {
+                    if (card.querySelector('iframe')) return;
+                    const tweetId = card.dataset.tweetId;
+                    const tweetUrl = card.dataset.tweetUrl;
+                    if (!tweetId) return;
+
+                    const iframe = document.createElement('iframe');
+                    iframe.className = 'twitter-embed';
+                    iframe.title = 'X / Twitter post';
+                    iframe.loading = 'lazy';
+                    iframe.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
+                    iframe.allowFullscreen = true;
+                    iframe.setAttribute('scrolling', 'no');
+                    iframe.style.overflow = 'hidden';
+                    iframe.src = `https://platform.twitter.com/embed/Tweet.html?id=${tweetId}&theme=dark&dnt=true`;
+
+                    const fallbackLink = card.querySelector('.twitter-fallback');
+                    if (fallbackLink) {
+                        fallbackLink.textContent = 'Open post on X';
+                        if (tweetUrl) {
+                            const link = document.createElement('a');
+                            link.href = tweetUrl;
+                            link.target = '_blank';
+                            link.rel = 'noopener noreferrer';
+                            link.textContent = fallbackLink.textContent;
+                            fallbackLink.replaceWith(link);
+                        }
+                    }
+
+                    card.innerHTML = '';
+                    card.appendChild(iframe);
+                    if (tweetUrl) {
+                        const link = document.createElement('a');
+                        link.href = tweetUrl;
+                        link.target = '_blank';
+                        link.rel = 'noopener noreferrer';
+                        link.className = 'twitter-fallback';
+                        link.textContent = 'Open post on X';
+                        card.appendChild(link);
+                    }
+                });
+            }, 2500);
         }

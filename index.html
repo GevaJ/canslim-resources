@@ -273,6 +273,9 @@
             grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
             gap: 1rem;
         }
+        #twitter-posts {
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        }
         .pdf-card,
         .media-card,
         .gallery-item {
@@ -349,12 +352,17 @@
             border: 2px solid rgba(255,224,102,0.4);
             box-shadow: 0 0 12px rgba(0,255,118,0.2);
             padding: 0.9rem;
+            display: flex;
+            flex-direction: column;
         }
         .twitter-embed {
             width: 100%;
-            height: 420px;
             border: 1px solid var(--border);
             background: #000;
+            min-height: 520px;
+        }
+        .twitter-card blockquote {
+            margin: 0;
         }
         .twitter-fallback {
             display: inline-block;
@@ -619,6 +627,9 @@
             .retro-frame {
                 border-width: 2px;
             }
+            .twitter-embed {
+                min-height: 480px;
+            }
         }
         @media (max-width: 520px) {
             .retro-title {
@@ -746,6 +757,7 @@
     </div>
 
     <script defer src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.min.js" integrity="sha512-O5bY5p+qZ+nhewc7ovQoPGwTpghSJOnA7xz/ES6sDIo8He3G6gZj/O9oYF6W1hLECPaKhLPgH8JbImTeTTKQ0g==" crossorigin="anonymous"></script>
+    <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
     <script defer src="results-inline.js"></script>
     <script defer src="main.js"></script>
 </body>
