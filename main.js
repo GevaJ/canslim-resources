@@ -3,6 +3,7 @@
             return Number(a.dataset.threshold || 0) - Number(b.dataset.threshold || 0);
         });
         const MEMBER_KEY = 'member';
+        const THEME_KEY = 'theme';
         const ACCESS_CODE_HASH = '0ffe1abd1a08215353c233d6e009613e95eec4253832a761af28ff37ac5a150c';
         const HASH_ALGO = 'SHA-256';
         const heroUi = {
@@ -33,6 +34,7 @@
         let supportTimer = null;
         const youtubeTitleCache = new Map();
         let twitterWidgetPromise = null;
+        let currentSearchQuery = '';
 
         async function loadScrapedData() {
             if (window.scrapedData && Array.isArray(window.scrapedData.links)) {
@@ -78,6 +80,8 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             setupLightbox();
+            setupSearch();
+            setupThemeToggle();
             initPdfAccessGate();
             scheduleSupportModal();
             toggleMemberBanner(isMember());
@@ -115,6 +119,94 @@
             renderTwitterPosts('twitter-posts', mergedTwitterPosts, 'No X/Twitter posts found.');
             renderGallery('images-gallery', imageItems, 'image', 'No images to display.');
             renderGallery('videos-gallery', videoItems, 'video', 'No videos to display.');
+            applySearchFilter(currentSearchQuery);
+        }
+
+        function setupSearch() {
+            const input = document.getElementById('search-input');
+            if (!input) return;
+            currentSearchQuery = input.value.trim().toLowerCase();
+            input.addEventListener('input', event => {
+                currentSearchQuery = event.target.value.trim().toLowerCase();
+                applySearchFilter(currentSearchQuery);
+            });
+        }
+
+        function setupThemeToggle() {
+            const button = document.getElementById('theme-toggle');
+            const root = document.body;
+            if (!button || !root) return;
+
+            const savedTheme = getSavedTheme();
+            const shouldUseDark = savedTheme === 'dark';
+            root.classList.toggle('dark-mode', shouldUseDark);
+            updateThemeButton(button, shouldUseDark);
+
+            button.addEventListener('click', () => {
+                const isDark = root.classList.toggle('dark-mode');
+                saveTheme(isDark ? 'dark' : 'light');
+                updateThemeButton(button, isDark);
+            });
+        }
+
+        function updateThemeButton(button, isDark) {
+            button.textContent = isDark ? 'Light mode' : 'Dark mode';
+        }
+
+        function getSavedTheme() {
+            try {
+                return localStorage.getItem(THEME_KEY) || '';
+            } catch (error) {
+                return '';
+            }
+        }
+
+        function saveTheme(theme) {
+            try {
+                localStorage.setItem(THEME_KEY, theme);
+            } catch (error) {
+                console.warn('Unable to persist theme', error);
+            }
+        }
+
+        function applySearchFilter(query = '') {
+            const activeSection = document.querySelector('.content.active');
+            const status = document.getElementById('search-status');
+            if (!activeSection) {
+                if (status) status.textContent = 'No active tab';
+                return;
+            }
+
+            const searchableNodes = Array.from(activeSection.querySelectorAll(
+                '#other-links li, #pdf-list .pdf-card, #youtube-videos .media-card, #twitter-posts .twitter-card, #images-gallery .gallery-item, #videos-gallery .gallery-item'
+            ));
+
+            if (!searchableNodes.length) {
+                if (status) {
+                    status.textContent = query
+                        ? `No results for "${query}" in this tab`
+                        : 'Showing all resources';
+                }
+                return;
+            }
+
+            let visibleCount = 0;
+            searchableNodes.forEach(node => {
+                if (node.classList.contains('empty-state')) {
+                    node.classList.remove('hidden');
+                    return;
+                }
+                const haystack = (node.textContent || '').toLowerCase();
+                const match = !query || haystack.includes(query);
+                node.classList.toggle('hidden', !match);
+                if (match) visibleCount += 1;
+            });
+
+            if (status) {
+                status.textContent = query
+                    ? `${visibleCount} result${visibleCount === 1 ? '' : 's'} for "${query}" in this tab`
+                    : `Showing ${visibleCount} result${visibleCount === 1 ? '' : 's'} in this tab`;
+            }
         }
 
         function categorizeLinks(links = []) {
@@ -1009,6 +1101,7 @@
             document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
             const trigger = event?.currentTarget || document.querySelector(`.tab[data-tab="${tabId}"]`);
             trigger?.classList.add('active');
+            applySearchFilter(currentSearchQuery);
         }
 
         function jumpToSection(tabId) {
