@@ -359,50 +359,6 @@
             filter: brightness(1.06);
             text-decoration: none;
         }
-        .ad-zone {
-            display: grid;
-            gap: 10px;
-            justify-items: center;
-            margin: 10px 0 18px;
-        }
-        .ad-row {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            flex-wrap: wrap;
-            width: 100%;
-        }
-        .ad-slot {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            max-width: 100%;
-            min-height: 50px;
-            overflow: hidden;
-        }
-        .native-ad-slot {
-            width: 100%;
-            max-width: 720px;
-            min-height: 90px;
-        }
-        .sponsored-link {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 36px;
-            padding: 8px 14px;
-            border: 1px solid var(--border);
-            border-radius: 999px;
-            background: var(--card-bg);
-            color: var(--muted);
-            font-size: 13px;
-            text-decoration: none;
-        }
-        .sponsored-link:hover {
-            box-shadow: var(--hover-shadow);
-            text-decoration: none;
-        }
 
         @keyframes spin {
             to { transform: rotate(360deg); }
@@ -418,9 +374,6 @@
                 position: static;
                 width: auto;
                 margin: 0 0 12px;
-            }
-            .ad-zone {
-                margin-top: 6px;
             }
         }
     </style>
@@ -457,43 +410,6 @@
             <div class="spinner"></div>
             <p>Loading resources...</p>
         </div>
-
-        <section class="ad-zone" aria-label="Advertisements">
-            <div class="ad-row">
-                <div class="ad-slot" aria-label="Advertisement">
-                    <script>
-                      atOptions = {
-                        'key' : '8be8f08cbf3226f0a60b73a9c90ee552',
-                        'format' : 'iframe',
-                        'height' : 60,
-                        'width' : 468,
-                        'params' : {}
-                      };
-                    </script>
-                    <script src="https://www.highperformanceformat.com/8be8f08cbf3226f0a60b73a9c90ee552/invoke.js"></script>
-                </div>
-
-                <div class="ad-slot" aria-label="Advertisement">
-                    <script>
-                      atOptions = {
-                        'key' : 'bd7a7f6bd23ea67882947f917075a16e',
-                        'format' : 'iframe',
-                        'height' : 50,
-                        'width' : 320,
-                        'params' : {}
-                      };
-                    </script>
-                    <script src="https://www.highperformanceformat.com/bd7a7f6bd23ea67882947f917075a16e/invoke.js"></script>
-                </div>
-            </div>
-
-            <div class="ad-slot native-ad-slot" aria-label="Advertisement">
-                <script async="async" data-cfasync="false" src="https://pl29442483.profitablecpmratenetwork.com/aa14a66c013212407abb606dd973e2f0/invoke.js"></script>
-                <div id="container-aa14a66c013212407abb606dd973e2f0"></div>
-            </div>
-
-            <a class="sponsored-link" href="https://www.profitablecpmratenetwork.com/cri1vkg4?key=3bf84c9aa051e09255557aa729ea343f" target="_blank" rel="noopener noreferrer">Sponsored resource</a>
-        </section>
 
         <nav class="tabs" aria-label="Resource tabs">
             <button class="tab active" data-tab="home" onclick="showTab(event, 'home')">All</button>
@@ -550,7 +466,5 @@
     <script async src="https://platform.twitter.com/widgets.js" charset="utf-8"></script>
     <script defer src="results-inline.js"></script>
     <script defer src="main.js"></script>
-    <script src="https://pl29442482.profitablecpmratenetwork.com/68/5f/be/685fbe981c678972cb42c65fc16b3f8d.js"></script>
-    <script src="https://pl29442485.profitablecpmratenetwork.com/84/70/ba/8470ba189d955f5bea7d0cfc3cd28eb0.js"></script>
 </body>
 </html>
