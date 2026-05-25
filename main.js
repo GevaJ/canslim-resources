@@ -22,18 +22,21 @@
             pulseEnergy: document.getElementById('pulse-energy')
         };
         const numberFormatter = new Intl.NumberFormat('en-US');
-        const inlineResults = window.inlineScrapedResults || null;
         const scrapedDataPromise = loadScrapedData();
 
+        const PDF_SCRIPT_SRC = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.min.js';
         const PDF_WORKER_SRC = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.worker.min.js';
-        if (window.pdfjsLib && pdfjsLib.GlobalWorkerOptions) {
-            pdfjsLib.GlobalWorkerOptions.workerSrc = PDF_WORKER_SRC;
-        }
-
         const lightboxState = { container: null, image: null, caption: null, items: [], index: -1 };
+        const dashboardState = {
+            tabs: {},
+            renderedTabs: new Set(['home'])
+        };
         let supportTimer = null;
         const youtubeTitleCache = new Map();
         let twitterWidgetPromise = null;
+        let pdfJsPromise = null;
+        let inlineResultsPromise = null;
+        let dashboardReadyPromise = null;
         let currentSearchQuery = '';
 
         async function loadScrapedData() {
@@ -51,6 +54,7 @@
                 window.scrapedData = normalized;
                 return normalized;
             } catch (error) {
+                const inlineResults = await loadInlineResultsBundle();
                 if (inlineResults) {
                     console.warn('Falling back to inline results bundle.', error);
                     const normalized = normalizePayload(inlineResults);
@@ -78,6 +82,55 @@
             return { links: [], images: [], videos: [], motivation: [] };
         }
 
+        function loadInlineResultsBundle() {
+            if (window.inlineScrapedResults) {
+                return Promise.resolve(window.inlineScrapedResults);
+            }
+            if (inlineResultsPromise) {
+                return inlineResultsPromise;
+            }
+
+            inlineResultsPromise = new Promise(resolve => {
+                const script = document.createElement('script');
+                script.src = 'results-inline.js';
+                script.defer = true;
+                script.onload = () => resolve(window.inlineScrapedResults || null);
+                script.onerror = () => resolve(null);
+                document.head.appendChild(script);
+            });
+
+            return inlineResultsPromise;
+        }
+
+        function ensurePdfJs() {
+            if (window.pdfjsLib) {
+                if (window.pdfjsLib.GlobalWorkerOptions) {
+                    window.pdfjsLib.GlobalWorkerOptions.workerSrc = PDF_WORKER_SRC;
+                }
+                return Promise.resolve(window.pdfjsLib);
+            }
+            if (pdfJsPromise) {
+                return pdfJsPromise;
+            }
+
+            pdfJsPromise = new Promise(resolve => {
+                const script = document.createElement('script');
+                script.src = PDF_SCRIPT_SRC;
+                script.defer = true;
+                script.crossOrigin = 'anonymous';
+                script.onload = () => {
+                    if (window.pdfjsLib?.GlobalWorkerOptions) {
+                        window.pdfjsLib.GlobalWorkerOptions.workerSrc = PDF_WORKER_SRC;
+                    }
+                    resolve(window.pdfjsLib || null);
+                };
+                script.onerror = () => resolve(null);
+                document.head.appendChild(script);
+            });
+
+            return pdfJsPromise;
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             setupLightbox();
             setupSearch();
@@ -86,9 +139,9 @@
             scheduleSupportModal();
             toggleMemberBanner(isMember());
             showLoader();
-            const dataLoad = scrapedDataPromise.then(populateDashboard);
+            dashboardReadyPromise = scrapedDataPromise.then(populateDashboard);
             const minimumDelay = new Promise(resolve => setTimeout(resolve, 1200));
-            Promise.allSettled([dataLoad, minimumDelay])
+            Promise.allSettled([dashboardReadyPromise, minimumDelay])
                 .finally(() => hideLoader());
         });
 
@@ -112,14 +165,43 @@
             };
             updateHeroStats(heroSummary);
 
-            renderPdfGallery('pdf-list', pdfLinks, 'No PDFs available yet.');
+            dashboardState.tabs.pdfs = {
+                render: () => renderPdfGallery('pdf-list', pdfLinks, 'No PDFs available yet.'),
+                ready: () => ensurePdfJs()
+            };
+            dashboardState.tabs.youtube = {
+                render: () => renderYoutubeVideos('youtube-videos', youtubeVideos, 'No YouTube videos found.')
+            };
+            dashboardState.tabs.twitter = {
+                render: () => renderTwitterPosts('twitter-posts', mergedTwitterPosts, 'No X/Twitter posts found.')
+            };
+            dashboardState.tabs.images = {
+                render: () => renderGallery('images-gallery', imageItems, 'image', 'No images to display.')
+            };
+            dashboardState.tabs.videos = {
+                render: () => renderGallery('videos-gallery', videoItems, 'video', 'No videos to display.')
+            };
+
             renderLinkList('other-links', otherLinks, 'No other links available yet.');
             renderLinkList('motivation-links', motivationLinks, 'No motivation links available yet.');
-            await renderYoutubeVideos('youtube-videos', youtubeVideos, 'No YouTube videos found.');
-            renderTwitterPosts('twitter-posts', mergedTwitterPosts, 'No X/Twitter posts found.');
-            renderGallery('images-gallery', imageItems, 'image', 'No images to display.');
-            renderGallery('videos-gallery', videoItems, 'video', 'No videos to display.');
             applySearchFilter(currentSearchQuery);
+        }
+
+        async function ensureTabContent(tabId) {
+            if (!tabId || dashboardState.renderedTabs.has(tabId)) return;
+            if (dashboardReadyPromise) {
+                await dashboardReadyPromise;
+            }
+            const tabConfig = dashboardState.tabs[tabId];
+            if (!tabConfig?.render) {
+                return;
+            }
+
+            if (typeof tabConfig.ready === 'function') {
+                await tabConfig.ready();
+            }
+            await tabConfig.render();
+            dashboardState.renderedTabs.add(tabId);
         }
 
         function setupSearch() {
@@ -524,18 +606,14 @@
 
                     cell.appendChild(img);
                 } else {
-                    const video = document.createElement('video');
-                    video.className = 'video-player';
-                    video.controls = true;
-                    video.preload = 'metadata';
-                    const source = document.createElement('source');
-                    source.src = item.src;
-                    source.type = guessMimeType(item.src);
-                    video.appendChild(source);
-
                     const caption = document.createElement('p');
                     caption.className = 'media-caption';
                     caption.textContent = item.label;
+
+                    const loadButton = document.createElement('button');
+                    loadButton.type = 'button';
+                    loadButton.className = 'video-load-button';
+                    loadButton.textContent = 'Load video';
 
                     const fallback = document.createElement('a');
                     fallback.href = item.src;
@@ -543,8 +621,24 @@
                     fallback.rel = 'noopener noreferrer';
                     fallback.textContent = 'Open video';
 
+                    const loadVideo = () => {
+                        if (cell.querySelector('video')) return;
+                        const video = document.createElement('video');
+                        video.className = 'video-player';
+                        video.controls = true;
+                        video.preload = 'metadata';
+                        video.playsInline = true;
+                        const source = document.createElement('source');
+                        source.src = item.src;
+                        source.type = guessMimeType(item.src);
+                        video.appendChild(source);
+                        cell.replaceChild(video, loadButton);
+                    };
+
+                    loadButton.addEventListener('click', loadVideo);
+
                     cell.appendChild(caption);
-                    cell.appendChild(video);
+                    cell.appendChild(loadButton);
                     cell.appendChild(fallback);
                 }
 
@@ -706,7 +800,9 @@
         }
 
         async function loadPdfThumbnail(url, imgElement) {
-            if (!window.pdfjsLib || !imgElement) return;
+            if (!imgElement) return;
+            await ensurePdfJs();
+            if (!window.pdfjsLib) return;
             const preview = await generatePdfThumbnail(url);
             if (preview) {
                 imgElement.src = preview;
@@ -1092,7 +1188,7 @@
             requestAnimationFrame(step);
         }
 
-        function showTab(event, tabId) {
+        async function showTab(event, tabId) {
             document.querySelectorAll('.content').forEach(section => section.classList.remove('active'));
             const activeSection = document.getElementById(tabId);
             if (activeSection) {
@@ -1101,6 +1197,7 @@
             document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
             const trigger = event?.currentTarget || document.querySelector(`.tab[data-tab="${tabId}"]`);
             trigger?.classList.add('active');
+            await ensureTabContent(tabId);
             applySearchFilter(currentSearchQuery);
         }
 
