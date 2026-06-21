@@ -74,12 +74,14 @@
                 links: resource.links || [],
                 images: resource.images || [],
                 videos: resource.videos || [],
-                motivation: motivation.links || []
+                motivation: motivation.links || [],
+                resourceItems: resource.items || [],
+                motivationItems: motivation.items || []
             };
         }
 
         function getEmptyData() {
-            return { links: [], images: [], videos: [], motivation: [] };
+            return { links: [], images: [], videos: [], motivation: [], resourceItems: [], motivationItems: [] };
         }
 
         function loadInlineResultsBundle() {
@@ -146,14 +148,12 @@
         });
 
         async function populateDashboard(data) {
-            const safeData = data || { links: [], images: [], videos: [], motivation: [] };
-            const uniqueImages = uniqueList(safeData.images);
-            const uniqueVideos = uniqueList(safeData.videos);
+            const safeData = data || { links: [], images: [], videos: [], motivation: [], resourceItems: [], motivationItems: [] };
             const { pdfLinks, youtubeVideos, otherLinks, twitterPosts } = categorizeLinks(safeData.links);
             const { motivationLinks, twitterPosts: motivationPosts } = categorizeMotivationLinks(safeData.motivation);
             const mergedTwitterPosts = mergeUniqueLinks([...twitterPosts, ...motivationPosts]);
-            const imageItems = uniqueImages.map(src => ({ src, label: buildImageLabel(src) }));
-            const videoItems = uniqueVideos.map(src => ({ src, label: buildMediaLabel(src) }));
+            const imageItems = buildGalleryItems(safeData.resourceItems, 'image', safeData.images, buildImageLabel);
+            const videoItems = buildGalleryItems(safeData.resourceItems, 'discord-video', safeData.videos, buildMediaLabel);
 
             const heroSummary = {
                 totalLinks: pdfLinks.length + youtubeVideos.length + otherLinks.length + motivationLinks.length + mergedTwitterPosts.length,
@@ -599,12 +599,23 @@
 
                 if (type === 'image') {
                     const img = document.createElement('img');
+                    const caption = document.createElement('p');
+                    caption.className = 'media-caption';
+                    caption.textContent = item.label;
                     img.src = item.src;
                     img.alt = item.label || 'Discord image';
                     img.loading = 'lazy';
                     img.addEventListener('click', () => openLightbox(item.src, item.label, index, items));
+                    img.addEventListener('error', () => {
+                        if (!cell.isConnected) return;
+                        cell.innerHTML = '';
+                        const unavailable = createGalleryUnavailable('Image unavailable');
+                        cell.appendChild(caption.cloneNode(true));
+                        cell.appendChild(unavailable);
+                    });
 
                     cell.appendChild(img);
+                    cell.appendChild(caption);
                 } else {
                     const caption = document.createElement('p');
                     caption.className = 'media-caption';
@@ -616,7 +627,7 @@
                     loadButton.textContent = 'Load video';
 
                     const fallback = document.createElement('a');
-                    fallback.href = item.src;
+                    fallback.href = item.originalUrl || item.src;
                     fallback.target = '_blank';
                     fallback.rel = 'noopener noreferrer';
                     fallback.textContent = 'Open video';
@@ -632,7 +643,11 @@
                         source.src = item.src;
                         source.type = guessMimeType(item.src);
                         video.appendChild(source);
+                        video.addEventListener('error', () => {
+                            renderUnavailableVideoState(cell, caption, fallback);
+                        }, { once: true });
                         cell.replaceChild(video, loadButton);
+                        video.load();
                     };
 
                     loadButton.addEventListener('click', loadVideo);
@@ -649,6 +664,62 @@
 
         function uniqueList(items = []) {
             return Array.from(new Set(items.map(item => item?.trim()).filter(Boolean)));
+        }
+
+        function buildGalleryItems(resourceItems = [], targetType, fallbackUrls = [], labelBuilder) {
+            const metadataItems = uniqueMediaItems(
+                (resourceItems || [])
+                    .filter(item => item?.type === targetType)
+                    .map(item => ({
+                        src: item.url,
+                        label: buildGalleryLabel(item, labelBuilder),
+                        originalUrl: item.originalUrl || ''
+                    }))
+            );
+
+            if (metadataItems.length) {
+                return metadataItems;
+            }
+
+            return uniqueList(fallbackUrls).map(src => ({ src, label: labelBuilder(src), originalUrl: '' }));
+        }
+
+        function uniqueMediaItems(items = []) {
+            const seen = new Set();
+            return items.filter(item => {
+                if (!item?.src || seen.has(item.src)) return false;
+                seen.add(item.src);
+                return true;
+            });
+        }
+
+        function buildGalleryLabel(item, labelBuilder) {
+            const source = item?.originalUrl || item?.url || '';
+            const preferred = item?.title || item?.filename || '';
+            const cleaned = preferred.replace(/\.[a-z0-9]+$/i, '').trim();
+            return cleaned || labelBuilder(source);
+        }
+
+        function createGalleryUnavailable(message) {
+            const unavailable = document.createElement('p');
+            unavailable.className = 'empty-state';
+            unavailable.textContent = message;
+            return unavailable;
+        }
+
+        function renderUnavailableVideoState(cell, caption, fallback) {
+            if (!cell) return;
+            const unavailable = createGalleryUnavailable('Video unavailable');
+            cell.innerHTML = '';
+            if (caption) {
+                cell.appendChild(caption.cloneNode(true));
+            }
+            cell.appendChild(unavailable);
+            if (fallback) {
+                const nextLink = fallback.cloneNode(true);
+                nextLink.textContent = 'Open source';
+                cell.appendChild(nextLink);
+            }
         }
 
         function mergeUniqueLinks(items = []) {
