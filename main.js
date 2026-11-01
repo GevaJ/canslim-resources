@@ -4,6 +4,7 @@
         });
         const MEMBER_KEY = 'member';
         const THEME_KEY = 'theme';
+        const BOOKMARKS_KEY = 'canslim-bookmarks';
         const ACCESS_CODE_HASH = '0ffe1abd1a08215353c233d6e009613e95eec4253832a761af28ff37ac5a150c';
         const HASH_ALGO = 'SHA-256';
         const heroUi = {
@@ -29,7 +30,8 @@
         const lightboxState = { container: null, image: null, caption: null, items: [], index: -1 };
         const dashboardState = {
             tabs: {},
-            renderedTabs: new Set(['home'])
+            renderedTabs: new Set(['home']),
+            metadataByUrl: new Map()
         };
         let supportTimer = null;
         const youtubeTitleCache = new Map();
@@ -149,8 +151,9 @@
 
         async function populateDashboard(data) {
             const safeData = data || { links: [], images: [], videos: [], motivation: [], resourceItems: [], motivationItems: [] };
-            const { pdfLinks, youtubeVideos, otherLinks, twitterPosts } = categorizeLinks(safeData.links);
-            const { motivationLinks, twitterPosts: motivationPosts } = categorizeMotivationLinks(safeData.motivation);
+            dashboardState.metadataByUrl = buildMetadataMap([...safeData.resourceItems, ...safeData.motivationItems]);
+            const { pdfLinks, youtubeVideos, otherLinks, twitterPosts } = categorizeLinks(safeData.links, dashboardState.metadataByUrl);
+            const { motivationLinks, twitterPosts: motivationPosts } = categorizeMotivationLinks(safeData.motivation, dashboardState.metadataByUrl);
             const mergedTwitterPosts = mergeUniqueLinks([...twitterPosts, ...motivationPosts]);
             const imageItems = buildGalleryItems(safeData.resourceItems, 'image', safeData.images, buildImageLabel);
             const videoItems = buildGalleryItems(safeData.resourceItems, 'discord-video', safeData.videos, buildMediaLabel);
@@ -181,9 +184,13 @@
             dashboardState.tabs.videos = {
                 render: () => renderGallery('videos-gallery', videoItems, 'video', 'No videos to display.')
             };
+            dashboardState.tabs.saved = {
+                render: renderSavedResources
+            };
 
             renderLinkList('other-links', otherLinks, 'No other links available yet.');
             renderLinkList('motivation-links', motivationLinks, 'No motivation links available yet.');
+            updateSavedCount();
             applySearchFilter(currentSearchQuery);
         }
 
@@ -260,7 +267,7 @@
             }
 
             const searchableNodes = Array.from(activeSection.querySelectorAll(
-                '#other-links li, #pdf-list .pdf-card, #youtube-videos .media-card, #twitter-posts .twitter-card, #images-gallery .gallery-item, #videos-gallery .gallery-item'
+                '#other-links li, #pdf-list .pdf-card, #youtube-videos .media-card, #twitter-posts .twitter-card, #images-gallery .gallery-item, #videos-gallery .gallery-item, #saved-resources .saved-card'
             ));
 
             if (!searchableNodes.length) {
@@ -291,7 +298,7 @@
             }
         }
 
-        function categorizeLinks(links = []) {
+        function categorizeLinks(links = [], metadataByUrl = new Map()) {
             const pdfLinks = [];
             const youtubeVideos = [];
             const otherLinks = [];
@@ -305,29 +312,29 @@
                 seen.add(link);
 
                 if (isPdf(link)) {
-                    pdfLinks.push({ url: link, label: buildDocumentLabel(link) });
+                    pdfLinks.push(enrichResource({ url: link, label: buildDocumentLabel(link), type: 'pdf' }, metadataByUrl));
                     return;
                 }
 
                 const youtubeId = extractYoutubeId(link);
                 if (youtubeId) {
-                    youtubeVideos.push({ url: link, id: youtubeId, label: buildYoutubeLabel(link, youtubeId) });
+                    youtubeVideos.push(enrichResource({ url: link, id: youtubeId, label: buildYoutubeLabel(link, youtubeId), type: 'youtube' }, metadataByUrl));
                     return;
                 }
 
                 const twitterId = extractTwitterStatusId(link);
                 if (twitterId) {
-                    twitterPosts.push({ url: link, id: twitterId });
+                    twitterPosts.push(enrichResource({ url: link, id: twitterId, label: `Post on X`, type: 'x-post' }, metadataByUrl));
                     return;
                 }
 
-                otherLinks.push({ url: link, label: buildGenericLabel(link) });
+                otherLinks.push(enrichResource({ url: link, label: buildGenericLabel(link), type: 'link' }, metadataByUrl));
             });
 
             return { pdfLinks, youtubeVideos, otherLinks, twitterPosts };
         }
 
-        function categorizeMotivationLinks(links = []) {
+        function categorizeMotivationLinks(links = [], metadataByUrl = new Map()) {
             const motivationLinks = [];
             const twitterPosts = [];
             const seen = new Set();
@@ -340,25 +347,76 @@
 
                 const twitterId = extractTwitterStatusId(link);
                 if (twitterId) {
-                    twitterPosts.push({ url: link, id: twitterId });
+                    twitterPosts.push(enrichResource({ url: link, id: twitterId, label: 'Post on X', type: 'x-post' }, metadataByUrl));
                     return;
                 }
 
                 if (isPdf(link)) {
-                    motivationLinks.push({ url: link, label: buildDocumentLabel(link) });
+                    motivationLinks.push(enrichResource({ url: link, label: buildDocumentLabel(link), type: 'pdf' }, metadataByUrl));
                     return;
                 }
 
                 const youtubeId = extractYoutubeId(link);
                 if (youtubeId) {
-                    motivationLinks.push({ url: link, label: buildYoutubeLabel(link, youtubeId) });
+                    motivationLinks.push(enrichResource({ url: link, label: buildYoutubeLabel(link, youtubeId), type: 'youtube' }, metadataByUrl));
                     return;
                 }
 
-                motivationLinks.push({ url: link, label: buildGenericLabel(link) });
+                motivationLinks.push(enrichResource({ url: link, label: buildGenericLabel(link), type: 'link' }, metadataByUrl));
             });
 
             return { motivationLinks, twitterPosts };
+        }
+
+        function buildMetadataMap(items = []) {
+            const map = new Map();
+            items.forEach(item => {
+                [item?.url, item?.originalUrl, item?.proxyUrl].filter(Boolean).forEach(url => map.set(url, item));
+            });
+            return map;
+        }
+
+        function enrichResource(resource, metadataByUrl = dashboardState.metadataByUrl) {
+            const metadata = metadataByUrl.get(resource.url) || {};
+            return {
+                ...resource,
+                title: metadata.title || resource.label || '',
+                label: metadata.title || resource.label || '',
+                creator: metadata.creator || metadata.discordAuthor || '',
+                topic: metadata.topic && metadata.topic !== 'Unsorted' ? metadata.topic : '',
+                postedAt: metadata.postedAt || '',
+                thumbnailUrl: metadata.thumbnailUrl || '',
+                type: metadata.type || resource.type || 'link'
+            };
+        }
+
+        function createResourceMeta(item) {
+            const meta = document.createElement('div');
+            meta.className = 'resource-meta';
+            const values = [];
+            if (item.topic) values.push({ text: item.topic, className: 'resource-topic' });
+            if (item.creator) values.push({ text: item.creator });
+            const date = formatResourceDate(item.postedAt);
+            if (date) values.push({ text: date });
+            values.forEach(value => {
+                const span = document.createElement('span');
+                span.textContent = value.text;
+                if (value.className) span.className = value.className;
+                meta.appendChild(span);
+            });
+            return meta;
+        }
+
+        function formatResourceDate(value) {
+            if (!value) return '';
+            const date = new Date(value);
+            if (Number.isNaN(date.getTime())) return '';
+            return new Intl.DateTimeFormat('en', { year: 'numeric', month: 'short', day: 'numeric' }).format(date);
+        }
+
+        function appendResourceMeta(container, item) {
+            const meta = createResourceMeta(item);
+            if (meta.childElementCount) container.appendChild(meta);
         }
 
         function buildLinkItems(links = []) {
@@ -404,6 +462,14 @@
             const fragment = document.createDocumentFragment();
             items.forEach(item => {
                 const li = document.createElement('li');
+                if (item.thumbnailUrl) {
+                    const thumb = document.createElement('img');
+                    thumb.className = 'link-thumb';
+                    thumb.src = item.thumbnailUrl;
+                    thumb.alt = '';
+                    thumb.loading = 'lazy';
+                    li.appendChild(thumb);
+                }
                 const titleLink = document.createElement('a');
                 titleLink.className = 'link-title';
                 titleLink.href = item.url;
@@ -417,6 +483,8 @@
 
                 li.appendChild(titleLink);
                 li.appendChild(urlCopy);
+                appendResourceMeta(li, item);
+                li.appendChild(createBookmarkButton(item));
                 fragment.appendChild(li);
             });
             container.appendChild(fragment);
@@ -452,6 +520,8 @@
 
                 card.appendChild(thumb);
                 card.appendChild(title);
+                appendResourceMeta(card, pdf);
+                card.appendChild(createBookmarkButton(pdf));
                 card.addEventListener('click', () => window.open(pdf.url, '_blank', 'noopener'));
                 card.addEventListener('keypress', event => {
                     if (event.key === 'Enter') {
@@ -485,7 +555,7 @@
                 wrapper.className = 'media-card youtube-card';
 
                 const heading = document.createElement('h3');
-                heading.textContent = 'Loading title…';
+                heading.textContent = video.title || 'Loading title…';
 
                 const placeholder = document.createElement('button');
                 placeholder.type = 'button';
@@ -529,6 +599,8 @@
 
                 wrapper.appendChild(heading);
                 wrapper.appendChild(placeholder);
+                appendResourceMeta(wrapper, video);
+                wrapper.appendChild(createBookmarkButton(video));
                 fragment.appendChild(wrapper);
             });
             container.appendChild(fragment);
@@ -573,6 +645,8 @@
                 blockquote.appendChild(link);
                 card.appendChild(blockquote);
                 card.appendChild(fallback);
+                appendResourceMeta(card, post);
+                card.appendChild(createBookmarkButton(post));
                 fragment.appendChild(card);
             });
             container.appendChild(fragment);
@@ -616,6 +690,7 @@
 
                     cell.appendChild(img);
                     cell.appendChild(caption);
+                    appendResourceMeta(cell, item);
                 } else {
                     const caption = document.createElement('p');
                     caption.className = 'media-caption';
@@ -655,7 +730,10 @@
                     cell.appendChild(caption);
                     cell.appendChild(loadButton);
                     cell.appendChild(fallback);
+                    appendResourceMeta(cell, item);
                 }
+
+                cell.appendChild(createBookmarkButton({ ...item, url: item.originalUrl || item.src, type }));
 
                 fragment.appendChild(cell);
             });
@@ -673,7 +751,13 @@
                     .map(item => ({
                         src: item.url,
                         label: buildGalleryLabel(item, labelBuilder),
-                        originalUrl: item.originalUrl || ''
+                         originalUrl: item.originalUrl || '',
+                         title: item.title || item.filename || '',
+                         creator: item.creator || item.discordAuthor || '',
+                         topic: item.topic && item.topic !== 'Unsorted' ? item.topic : '',
+                         postedAt: item.postedAt || '',
+                         thumbnailUrl: item.thumbnailUrl || '',
+                         type: item.type || targetType
                     }))
             );
 
@@ -720,6 +804,138 @@
                 nextLink.textContent = 'Open source';
                 cell.appendChild(nextLink);
             }
+        }
+
+        function getBookmarks() {
+            try {
+                const parsed = JSON.parse(localStorage.getItem(BOOKMARKS_KEY) || '[]');
+                return Array.isArray(parsed) ? parsed : [];
+            } catch (error) {
+                return [];
+            }
+        }
+
+        function saveBookmarks(items) {
+            try {
+                localStorage.setItem(BOOKMARKS_KEY, JSON.stringify(items));
+            } catch (error) {
+                console.warn('Unable to save bookmarks', error);
+            }
+        }
+
+        function bookmarkSnapshot(item = {}) {
+            const url = item.url || item.originalUrl || item.src || '';
+            return {
+                url,
+                title: item.title || item.label || buildGenericLabel(url),
+                label: item.title || item.label || buildGenericLabel(url),
+                creator: item.creator || '',
+                topic: item.topic || '',
+                postedAt: item.postedAt || '',
+                thumbnailUrl: item.thumbnailUrl || (item.type === 'image' ? item.src : ''),
+                type: item.type || 'link',
+                id: item.id || extractYoutubeId(url) || ''
+            };
+        }
+
+        function isBookmarked(url) {
+            return !!url && getBookmarks().some(item => item.url === url);
+        }
+
+        function createBookmarkButton(item) {
+            const snapshot = bookmarkSnapshot(item);
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'bookmark-button';
+            button.dataset.bookmarkUrl = snapshot.url;
+            updateBookmarkButton(button, isBookmarked(snapshot.url));
+            button.addEventListener('click', event => {
+                event.preventDefault();
+                event.stopPropagation();
+                toggleBookmark(snapshot);
+            });
+            return button;
+        }
+
+        function updateBookmarkButton(button, saved) {
+            button.classList.toggle('saved', saved);
+            button.textContent = saved ? '★' : '☆';
+            button.title = saved ? 'Remove from Saved' : 'Save resource';
+            button.setAttribute('aria-label', button.title);
+            button.setAttribute('aria-pressed', String(saved));
+        }
+
+        function toggleBookmark(item) {
+            if (!item.url) return;
+            const bookmarks = getBookmarks();
+            const index = bookmarks.findIndex(saved => saved.url === item.url);
+            const saved = index === -1;
+            if (saved) bookmarks.unshift(item);
+            else bookmarks.splice(index, 1);
+            saveBookmarks(bookmarks);
+            document.querySelectorAll('.bookmark-button').forEach(button => {
+                if (button.dataset.bookmarkUrl === item.url) updateBookmarkButton(button, saved);
+            });
+            updateSavedCount();
+            renderSavedResources();
+            if (document.getElementById('saved')?.classList.contains('active')) {
+                applySearchFilter(currentSearchQuery);
+            }
+        }
+
+        function updateSavedCount() {
+            const count = getBookmarks().length;
+            const node = document.getElementById('saved-count');
+            if (node) node.textContent = count ? `(${count})` : '';
+        }
+
+        function renderSavedResources() {
+            const container = document.getElementById('saved-resources');
+            if (!container) return;
+            container.innerHTML = '';
+            const bookmarks = getBookmarks();
+            if (!bookmarks.length) {
+                const empty = document.createElement('p');
+                empty.className = 'empty-state';
+                empty.textContent = 'Nothing saved yet. Use the ☆ button on any resource to keep it here.';
+                container.appendChild(empty);
+                return;
+            }
+
+            const fragment = document.createDocumentFragment();
+            bookmarks.forEach(item => {
+                const card = document.createElement('article');
+                card.className = 'saved-card';
+                const thumbnail = getResourceThumbnail(item);
+                if (thumbnail) {
+                    const img = document.createElement('img');
+                    img.src = thumbnail;
+                    img.alt = '';
+                    img.loading = 'lazy';
+                    card.appendChild(img);
+                }
+                const body = document.createElement('div');
+                body.className = 'saved-card-body';
+                const link = document.createElement('a');
+                link.className = 'saved-card-title';
+                link.href = item.url;
+                link.target = '_blank';
+                link.rel = 'noopener noreferrer';
+                link.textContent = item.title || item.label || buildGenericLabel(item.url);
+                body.appendChild(link);
+                appendResourceMeta(body, item);
+                card.appendChild(body);
+                card.appendChild(createBookmarkButton(item));
+                fragment.appendChild(card);
+            });
+            container.appendChild(fragment);
+        }
+
+        function getResourceThumbnail(item) {
+            if (item.thumbnailUrl) return item.thumbnailUrl;
+            const youtubeId = item.id || extractYoutubeId(item.url || '');
+            if (youtubeId) return `https://i.ytimg.com/vi/${youtubeId}/hqdefault.jpg`;
+            return item.type === 'image' ? item.url : '';
         }
 
         function mergeUniqueLinks(items = []) {
@@ -1373,6 +1589,14 @@
                         link.className = 'twitter-fallback';
                         link.textContent = 'Open post on X';
                         card.appendChild(link);
+                        const post = enrichResource({
+                            url: tweetUrl,
+                            id: tweetId,
+                            label: 'Post on X',
+                            type: 'x-post'
+                        });
+                        appendResourceMeta(card, post);
+                        card.appendChild(createBookmarkButton(post));
                     }
                 });
             }, 2500);
