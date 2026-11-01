@@ -1,15 +1,48 @@
 const fs = require('fs');
 const path = require('path');
 const fsp = fs.promises;
+const envPath = path.join(__dirname, '.env');
 
-const token = process.env.DISCORD_TOKEN;
+loadEnvFile(envPath);
+
+const configuredToken = (process.env.DISCORD_TOKEN || '').trim();
+const token = configuredToken && !/^Bot\s+/i.test(configuredToken)
+  ? `Bot ${configuredToken}`
+  : configuredToken;
 const channelIdResource = process.env.DISCORD_RESOURCE_CHANNEL_ID || '1259392713174814816';
 const channelIdMotivation = process.env.DISCORD_MOTIVATION_CHANNEL_ID || '1269536886586609695';
 const topicsPath = path.join(__dirname, 'topics.json');
-const mediaRoot = path.join(__dirname, 'media');
 
 if (!token) {
-  throw new Error('Missing DISCORD_TOKEN environment variable.');
+  throw new Error('Missing DISCORD_TOKEN. Set it in .env or the environment.');
+}
+
+function loadEnvFile(filePath) {
+  if (!fs.existsSync(filePath)) {
+    return;
+  }
+
+  const content = fs.readFileSync(filePath, 'utf8');
+  for (const rawLine of content.split(/\r?\n/)) {
+    const line = rawLine.trim();
+    if (!line || line.startsWith('#')) continue;
+
+    const separatorIndex = line.indexOf('=');
+    if (separatorIndex === -1) continue;
+
+    const key = line.slice(0, separatorIndex).trim();
+    if (!key || process.env[key] !== undefined) continue;
+
+    let value = line.slice(separatorIndex + 1).trim();
+    if (
+      (value.startsWith('"') && value.endsWith('"')) ||
+      (value.startsWith("'") && value.endsWith("'"))
+    ) {
+      value = value.slice(1, -1);
+    }
+
+    process.env[key] = value;
+  }
 }
 
 const results = {
@@ -34,7 +67,7 @@ async function fetchAllFromChannel(channelId, section, topicRules) {
 
   while (true) {
     const url = `https://discord.com/api/v9/channels/${channelId}/messages?limit=100${before ? `&before=${before}` : ''}`;
-    const res = await fetch(url, { headers: { Authorization: token } });
+    const res = await fetchDiscord(url);
 
     if (!res.ok) {
       throw new Error(`Discord API failed for ${section}: ${res.status} ${res.statusText}`);
@@ -70,6 +103,30 @@ async function fetchAllFromChannel(channelId, section, topicRules) {
   results[section].videos = items.filter(item => item.type === 'discord-video').map(item => item.url);
 }
 
+async function fetchDiscord(url, maxRetries = 8) {
+  for (let attempt = 0; attempt <= maxRetries; attempt += 1) {
+    const response = await fetch(url, { headers: { Authorization: token } });
+    if (response.status !== 429) return response;
+
+    if (attempt === maxRetries) return response;
+
+    let retryAfterMs = 1000;
+    try {
+      const rateLimit = await response.json();
+      retryAfterMs = Math.max(250, Math.ceil(Number(rateLimit.retry_after || 1) * 1000));
+    } catch (error) {
+      const headerDelay = Number(response.headers.get('retry-after') || 1);
+      retryAfterMs = Math.max(250, Math.ceil(headerDelay * 1000));
+    }
+    console.warn(`Discord rate limit reached; retrying in ${retryAfterMs}ms.`);
+    await delay(retryAfterMs);
+  }
+}
+
+function delay(milliseconds) {
+  return new Promise(resolve => setTimeout(resolve, milliseconds));
+}
+
 function extractMessageItems(msg, section) {
   const items = [];
   const base = {
@@ -101,6 +158,7 @@ function extractMessageItems(msg, section) {
         ...base,
         url: att.url,
         originalUrl: att.url,
+        proxyUrl: att.proxy_url || '',
         kind: 'attachment',
         type: 'image',
         title: att.filename || '',
@@ -116,6 +174,7 @@ function extractMessageItems(msg, section) {
         ...base,
         url: att.url,
         originalUrl: att.url,
+        proxyUrl: att.proxy_url || '',
         kind: 'attachment',
         type: 'discord-video',
         title: att.filename || '',
@@ -142,7 +201,10 @@ async function enrichItem(item, topicRules) {
   };
 
   if (enriched.kind === 'attachment' && (enriched.type === 'image' || enriched.type === 'discord-video')) {
-    await mirrorDiscordAttachment(enriched);
+    // Keep Discord's hosted attachment URL in the generated website data.
+    // Downloading attachments into media/ makes the repository grow and is
+    // unnecessary because the site can render the remote URL directly.
+    enriched.url = enriched.originalUrl || enriched.url;
     enriched.creator = enriched.discordAuthor || enriched.domain || 'Discord';
   } else if (enriched.type === 'youtube') {
     await enrichYoutube(enriched);
@@ -291,12 +353,17 @@ async function mirrorDiscordAttachment(item) {
 
   await fsp.mkdir(path.dirname(diskPath), { recursive: true });
 
-  const response = await fetch(item.originalUrl, {
-    headers: { 'User-Agent': 'CANSLIM Resources attachment mirror' }
-  });
+  const candidates = [...new Set([item.originalUrl, item.proxyUrl].filter(Boolean))];
+  let response;
+  for (const candidate of candidates) {
+    response = await fetch(candidate, {
+      headers: { 'User-Agent': 'CANSLIM Resources attachment mirror' }
+    });
+    if (response.ok) break;
+  }
 
-  if (!response.ok) {
-    throw new Error(`Failed to mirror attachment ${item.originalUrl}: ${response.status} ${response.statusText}`);
+  if (!response?.ok) {
+    throw new Error(`Failed to mirror attachment ${item.originalUrl}: ${response?.status || 'no response'} ${response?.statusText || ''}`.trim());
   }
 
   const buffer = Buffer.from(await response.arrayBuffer());
@@ -367,10 +434,12 @@ async function isCurrentMirror(diskPath, metadataPath, item) {
   }
 
   try {
+    const stats = await fsp.stat(diskPath);
     const raw = await fsp.readFile(metadataPath, 'utf8');
     const metadata = JSON.parse(raw);
-    return metadata.attachmentId === (item.attachmentId || '')
-      && metadata.originalUrl === (item.originalUrl || '');
+    // Discord refreshes the signed query string even though the attachment is
+    // unchanged. The attachment ID is the durable identity for this file.
+    return stats.size > 0 && metadata.attachmentId === (item.attachmentId || '');
   } catch (error) {
     return false;
   }
@@ -486,10 +555,19 @@ function decodeHtml(value = '') {
 
 async function main() {
   const topicRules = await readTopicRules();
-  await fsp.mkdir(mediaRoot, { recursive: true });
   await fetchAllFromChannel(channelIdResource, 'resource', topicRules);
   await fetchAllFromChannel(channelIdMotivation, 'motivation', topicRules);
-  await fsp.writeFile('results.txt', JSON.stringify(results, null, 2));
+  if (!results.resource.items.length && !results.motivation.items.length) {
+    throw new Error(
+      'Discord returned zero messages for both channels. Existing result files were left unchanged; check View Channel and Read Message History permissions.'
+    );
+  }
+  const serialized = JSON.stringify(results, null, 2);
+  await fsp.writeFile(path.join(__dirname, 'results.txt'), serialized);
+  await fsp.writeFile(
+    path.join(__dirname, 'results-inline.js'),
+    `window.inlineScrapedResults = ${serialized};\n`
+  );
   console.log(`Scraped ${results.resource.items.length} resource items and ${results.motivation.items.length} motivation items.`);
 }
 
