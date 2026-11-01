@@ -280,6 +280,84 @@
             object-fit: cover;
             background: #111;
         }
+        .saved-player {
+            display: block;
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            border: 0;
+            background: #000;
+        }
+        .saved-media-fallback {
+            display: none;
+            padding: 14px;
+            color: var(--muted);
+            font-size: 13px;
+        }
+        .saved-media-fallback.visible { display: block; }
+        .saved-x-preview {
+            min-height: 138px;
+            padding: 22px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            background:
+                radial-gradient(circle at 85% 20%, rgba(66, 133, 244, .24), transparent 42%),
+                linear-gradient(145deg, #101114, #24272d);
+            color: #fff;
+        }
+        .saved-x-mark {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 34px;
+            font-weight: 700;
+            line-height: 1;
+        }
+        .saved-x-author {
+            color: #d7dce5;
+            font-size: 14px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .saved-x-card .saved-card-title {
+            color: var(--result-title);
+        }
+        .saved-pdf-shell {
+            position: relative;
+            height: 190px;
+            display: grid;
+            place-items: center;
+            padding: 14px;
+            overflow: hidden;
+            background:
+                radial-gradient(circle at 80% 15%, rgba(234, 67, 53, .18), transparent 38%),
+                linear-gradient(145deg, #eef2ff, #dbe4ff);
+        }
+        .saved-card img.saved-pdf-preview {
+            width: auto;
+            max-width: 86%;
+            height: 162px;
+            object-fit: contain;
+            border-radius: 4px;
+            background: #fff;
+            box-shadow: 0 8px 22px rgba(15, 23, 42, .22);
+        }
+        .saved-pdf-badge {
+            position: absolute;
+            left: 12px;
+            bottom: 12px;
+            padding: 5px 8px;
+            border-radius: 5px;
+            background: #d93025;
+            color: #fff;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .06em;
+        }
+        body.dark-mode .saved-pdf-shell {
+            background:
+                radial-gradient(circle at 80% 15%, rgba(234, 67, 53, .22), transparent 38%),
+                linear-gradient(145deg, #30333a, #202124);
+        }
         .saved-card-body { padding: 12px 46px 0 12px; }
         .saved-card-title {
             display: block;

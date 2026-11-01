@@ -31,7 +31,8 @@
         const dashboardState = {
             tabs: {},
             renderedTabs: new Set(['home']),
-            metadataByUrl: new Map()
+            metadataByUrl: new Map(),
+            metadataByResourceKey: new Map()
         };
         let supportTimer = null;
         const youtubeTitleCache = new Map();
@@ -152,6 +153,7 @@
         async function populateDashboard(data) {
             const safeData = data || { links: [], images: [], videos: [], motivation: [], resourceItems: [], motivationItems: [] };
             dashboardState.metadataByUrl = buildMetadataMap([...safeData.resourceItems, ...safeData.motivationItems]);
+            dashboardState.metadataByResourceKey = buildResourceKeyMap([...safeData.resourceItems, ...safeData.motivationItems]);
             const { pdfLinks, youtubeVideos, otherLinks, twitterPosts } = categorizeLinks(safeData.links, dashboardState.metadataByUrl);
             const { motivationLinks, twitterPosts: motivationPosts } = categorizeMotivationLinks(safeData.motivation, dashboardState.metadataByUrl);
             const mergedTwitterPosts = mergeUniqueLinks([...twitterPosts, ...motivationPosts]);
@@ -372,6 +374,16 @@
             const map = new Map();
             items.forEach(item => {
                 [item?.url, item?.originalUrl, item?.proxyUrl].filter(Boolean).forEach(url => map.set(url, item));
+            });
+            return map;
+        }
+
+        function buildResourceKeyMap(items = []) {
+            const map = new Map();
+            items.forEach(item => {
+                [item?.url, item?.originalUrl, item?.proxyUrl].filter(Boolean).forEach(url => {
+                    map.set(getResourceKey(url), item);
+                });
             });
             return map;
         }
@@ -826,11 +838,12 @@
         function bookmarkSnapshot(item = {}) {
             const url = item.url || item.originalUrl || item.src || '';
             return {
+                key: getResourceKey(url),
                 url,
                 title: item.title || item.label || buildGenericLabel(url),
                 label: item.title || item.label || buildGenericLabel(url),
                 creator: item.creator || '',
-                topic: item.topic || '',
+                topic: item.topic && item.topic !== 'Unsorted' ? item.topic : '',
                 postedAt: item.postedAt || '',
                 thumbnailUrl: item.thumbnailUrl || (item.type === 'image' ? item.src : ''),
                 type: item.type || 'link',
@@ -839,7 +852,8 @@
         }
 
         function isBookmarked(url) {
-            return !!url && getBookmarks().some(item => item.url === url);
+            const key = getResourceKey(url);
+            return !!url && getBookmarks().some(item => (item.key || getResourceKey(item.url)) === key);
         }
 
         function createBookmarkButton(item) {
@@ -847,7 +861,7 @@
             const button = document.createElement('button');
             button.type = 'button';
             button.className = 'bookmark-button';
-            button.dataset.bookmarkUrl = snapshot.url;
+            button.dataset.bookmarkKey = snapshot.key;
             updateBookmarkButton(button, isBookmarked(snapshot.url));
             button.addEventListener('click', event => {
                 event.preventDefault();
@@ -868,13 +882,14 @@
         function toggleBookmark(item) {
             if (!item.url) return;
             const bookmarks = getBookmarks();
-            const index = bookmarks.findIndex(saved => saved.url === item.url);
+            const itemKey = item.key || getResourceKey(item.url);
+            const index = bookmarks.findIndex(saved => (saved.key || getResourceKey(saved.url)) === itemKey);
             const saved = index === -1;
             if (saved) bookmarks.unshift(item);
             else bookmarks.splice(index, 1);
             saveBookmarks(bookmarks);
             document.querySelectorAll('.bookmark-button').forEach(button => {
-                if (button.dataset.bookmarkUrl === item.url) updateBookmarkButton(button, saved);
+                if (button.dataset.bookmarkKey === itemKey) updateBookmarkButton(button, saved);
             });
             updateSavedCount();
             renderSavedResources();
@@ -893,7 +908,7 @@
             const container = document.getElementById('saved-resources');
             if (!container) return;
             container.innerHTML = '';
-            const bookmarks = getBookmarks();
+            const bookmarks = getBookmarks().map(refreshSavedResource);
             if (!bookmarks.length) {
                 const empty = document.createElement('p');
                 empty.className = 'empty-state';
@@ -906,14 +921,7 @@
             bookmarks.forEach(item => {
                 const card = document.createElement('article');
                 card.className = 'saved-card';
-                const thumbnail = getResourceThumbnail(item);
-                if (thumbnail) {
-                    const img = document.createElement('img');
-                    img.src = thumbnail;
-                    img.alt = '';
-                    img.loading = 'lazy';
-                    card.appendChild(img);
-                }
+                appendSavedMedia(card, item);
                 const body = document.createElement('div');
                 body.className = 'saved-card-body';
                 const link = document.createElement('a');
@@ -921,7 +929,7 @@
                 link.href = item.url;
                 link.target = '_blank';
                 link.rel = 'noopener noreferrer';
-                link.textContent = item.title || item.label || buildGenericLabel(item.url);
+                link.textContent = getSavedResourceTitle(item);
                 body.appendChild(link);
                 appendResourceMeta(body, item);
                 card.appendChild(body);
@@ -929,6 +937,142 @@
                 fragment.appendChild(card);
             });
             container.appendChild(fragment);
+        }
+
+        function refreshSavedResource(saved) {
+            const key = saved.key || getResourceKey(saved.url);
+            const current = dashboardState.metadataByResourceKey.get(key);
+            if (!current) return { ...saved, key };
+            const currentUrl = current.url || current.originalUrl || saved.url;
+            return bookmarkSnapshot({
+                ...saved,
+                ...current,
+                url: currentUrl,
+                label: current.title || saved.label,
+                title: current.title || saved.title,
+                type: current.type || saved.type
+            });
+        }
+
+        function getResourceKey(url) {
+            if (!url) return '';
+            const youtubeId = extractYoutubeId(url);
+            if (youtubeId) return `youtube:${youtubeId}`;
+            try {
+                const parsed = new URL(url);
+                if (/^(?:cdn|media)\.discordapp\.(?:com|net)$/i.test(parsed.hostname)) {
+                    return `discord:${parsed.pathname}`;
+                }
+            } catch (error) {
+                return url;
+            }
+            return url;
+        }
+
+        function appendSavedMedia(card, item) {
+            if (isPdfResource(item)) {
+                card.classList.add('saved-pdf-card');
+                const shell = document.createElement('div');
+                shell.className = 'saved-pdf-shell';
+                const preview = document.createElement('img');
+                preview.className = 'saved-pdf-preview';
+                preview.src = createPdfPlaceholder(getSavedResourceTitle(item));
+                preview.alt = `${getSavedResourceTitle(item)} preview`;
+                const badge = document.createElement('span');
+                badge.className = 'saved-pdf-badge';
+                badge.textContent = 'PDF';
+                shell.appendChild(preview);
+                shell.appendChild(badge);
+                card.appendChild(shell);
+                loadPdfThumbnail(item.url, preview);
+                return;
+            }
+
+            if (isXResource(item)) {
+                card.classList.add('saved-x-card');
+                const preview = document.createElement('div');
+                preview.className = 'saved-x-preview';
+                const mark = document.createElement('span');
+                mark.className = 'saved-x-mark';
+                mark.textContent = '𝕏';
+                mark.setAttribute('aria-hidden', 'true');
+                const author = document.createElement('span');
+                author.className = 'saved-x-author';
+                author.textContent = item.creator || 'Post saved from X';
+                preview.appendChild(mark);
+                preview.appendChild(author);
+                card.appendChild(preview);
+                return;
+            }
+
+            const youtubeId = item.id || extractYoutubeId(item.url || '');
+            if (youtubeId && (item.type === 'youtube' || item.type === 'video')) {
+                const iframe = document.createElement('iframe');
+                iframe.className = 'saved-player';
+                iframe.src = `https://www.youtube-nocookie.com/embed/${youtubeId}?rel=0&modestbranding=1`;
+                iframe.title = item.title || 'Saved YouTube video';
+                iframe.loading = 'lazy';
+                iframe.allowFullscreen = true;
+                iframe.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
+                iframe.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share');
+                card.appendChild(iframe);
+                return;
+            }
+
+            if (isDirectVideoResource(item)) {
+                const video = document.createElement('video');
+                video.className = 'saved-player';
+                video.controls = true;
+                video.preload = 'metadata';
+                video.playsInline = true;
+                const source = document.createElement('source');
+                source.src = item.url;
+                source.type = guessMimeType(item.url);
+                video.appendChild(source);
+                const fallback = document.createElement('p');
+                fallback.className = 'saved-media-fallback';
+                fallback.textContent = 'This video cannot be played in your browser. Use the title below to open the source.';
+                video.addEventListener('error', () => fallback.classList.add('visible'));
+                source.addEventListener('error', () => fallback.classList.add('visible'));
+                card.appendChild(video);
+                card.appendChild(fallback);
+                return;
+            }
+
+            const thumbnail = getResourceThumbnail(item);
+            if (thumbnail) {
+                const img = document.createElement('img');
+                img.src = thumbnail;
+                img.alt = '';
+                img.loading = 'lazy';
+                card.appendChild(img);
+            }
+        }
+
+        function isDirectVideoResource(item) {
+            return ['video', 'discord-video'].includes(item.type)
+                || /\.(mp4|webm|mov)(?:\?|$)/i.test(item.url || '');
+        }
+
+        function isXResource(item) {
+            if (item.type === 'x-post') return true;
+            try {
+                return /(^|\.)x\.com$|(^|\.)twitter\.com$/i.test(new URL(item.url || '').hostname);
+            } catch (error) {
+                return false;
+            }
+        }
+
+        function isPdfResource(item) {
+            return item.type === 'pdf' || isPdf(item.url || '');
+        }
+
+        function getSavedResourceTitle(item) {
+            if (isXResource(item)) {
+                const creator = (item.creator || '').trim();
+                return creator ? `View post by ${creator} on X` : 'View post on X';
+            }
+            return item.title || item.label || buildGenericLabel(item.url);
         }
 
         function getResourceThumbnail(item) {
@@ -1054,6 +1198,7 @@
         function guessMimeType(src) {
             const ext = src.split('.').pop()?.split('?')[0]?.toLowerCase();
             if (ext === 'webm') return 'video/webm';
+            if (ext === 'mov') return 'video/quicktime';
             return 'video/mp4';
         }
 
