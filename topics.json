@@ -1,0 +1,52 @@
+{
+  "topics": [
+    {
+      "name": "CANSLIM",
+      "keywords": ["canslim", "can slim", "cup with handle", "base breakout", "pivot", "relative strength"],
+      "domains": ["williamoneil.com", "oneilglobaladvisors.com"]
+    },
+    {
+      "name": "IBD/O'Neil",
+      "keywords": ["ibd", "investors business daily", "oneil", "market surge", "marketsurge"],
+      "domains": ["investors.com", "marketsurge.investors.com", "shop.investors.com"]
+    },
+    {
+      "name": "Wyckoff",
+      "keywords": ["wyckoff", "accumulation", "distribution", "trading range", "tape reading"],
+      "domains": ["wyckoffanalytics.com"]
+    },
+    {
+      "name": "Market Psychology",
+      "keywords": ["psychology", "mindset", "discipline", "trading coach", "expectations", "emotion"]
+    },
+    {
+      "name": "Risk Management",
+      "keywords": ["risk", "sell rule", "loss", "position sizing", "stop loss", "drawdown"]
+    },
+    {
+      "name": "Chart Patterns",
+      "keywords": ["chart pattern", "breakout", "gap up", "climax top", "earnings gap", "base"],
+      "types": ["pdf"]
+    },
+    {
+      "name": "Webinars",
+      "keywords": ["webinar", "archive", "tml talk", "live", "presentation"],
+      "domains": ["traderlion.com", "cmtassociation.org"]
+    },
+    {
+      "name": "Books/PDFs",
+      "keywords": ["book", "pdf", "livermore", "archive", "scribd"],
+      "types": ["pdf"],
+      "domains": ["archive.org", "scribd.com"]
+    },
+    {
+      "name": "Tools",
+      "keywords": ["tool", "scanner", "script", "tradingview", "barchart", "top stocks", "resources"],
+      "domains": ["tradingview.com", "barchart.com", "drive.google.com", "docs.google.com"]
+    },
+    {
+      "name": "Motivation",
+      "keywords": ["motivation", "inspiration", "quote", "mindset"]
+    }
+  ]
+}
