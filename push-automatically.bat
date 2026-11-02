@@ -4,6 +4,25 @@ setlocal EnableExtensions DisableDelayedExpansion
 pushd "%~dp0" >nul
 if errorlevel 1 exit /b 1
 
+rem Task Scheduler may have a minimal PATH and no interactive desktop.
+set "PATH=%ProgramFiles%\nodejs;%ProgramFiles%\Git\cmd;%PATH%"
+set "GIT_TERMINAL_PROMPT=0"
+set "GCM_INTERACTIVE=Never"
+if not exist "logs\" mkdir "logs"
+if not exist "logs\" (
+  echo ERROR: Cannot create the logs directory.
+  popd >nul
+  exit /b 1
+)
+echo Running scraper. Output is appended to "%~dp0logs\push-automatically.log".
+call :run %* >> "logs\push-automatically.log" 2>&1
+set "runStatus=%errorlevel%"
+popd >nul
+exit /b %runStatus%
+
+:run
+echo.
+echo ===== Started %date% %time% =====
 set "step=checking prerequisites"
 where node >nul 2>&1
 if errorlevel 1 (
@@ -65,10 +84,10 @@ git push
 if errorlevel 1 goto :error
 
 echo SUCCESS: Scraping, inline results, and Git push completed.
-popd >nul
+echo ===== Finished %date% %time% =====
 exit /b 0
 
 :error
 echo ERROR: Failed while %step%. See the error above. Nothing further was run.
-popd >nul
+echo ===== Failed %date% %time% =====
 exit /b 1
